@@ -1,0 +1,236 @@
+const Jwt = require('jsonwebtoken');
+const uuid = require("uuid/v1");
+
+const Sequelize = require('sequelize');
+const sequelize = new Sequelize('mysql://root:@127.0.0.1:3306/alcoolodico');
+sequelize.authenticate();
+
+const Game = sequelize.define('games', {
+    name: {type: Sequelize.STRING},
+    preview: {type: Sequelize.TEXT},
+    rules: {type: Sequelize.JSON},
+    images: {type: Sequelize.JSON},
+    visible: {type: Sequelize.BOOLEAN},
+});
+const User = sequelize.define('users', {
+    pseudo: {type: Sequelize.STRING},
+    firstname: {type: Sequelize.STRING},
+    lastname: {type: Sequelize.STRING},
+    mail: {type: Sequelize.STRING},
+    password: {type: Sequelize.STRING},
+    admin: {type: Sequelize.BOOLEAN},
+});
+const Category = sequelize.define('categories', {
+    name: {type: Sequelize.STRING},
+});
+const Comment = sequelize.define('comments', {
+    rate: {type: Sequelize.INTEGER},
+    review: {type: Sequelize.TEXT},
+});
+
+Game.belongsTo(Category);
+Game.belongsTo(User);
+Comment.belongsTo(User);
+Game.hasMany(Comment, {as: 'coms'});
+
+
+module.exports = [
+    {
+        method: 'POST',
+        path: '/login',
+        config: {auth: false},
+        handler: async (request, reply) => {
+            let payload = request.payload;
+            let user = await User.findOne({where: {mail: payload.mail, password: payload.password}});
+            if (user.id) {
+                const jwtToken = Jwt.sign(user.id, 'NeverShareYourSecret',
+                    {
+                        algorithm: 'HS256',
+                        //expiresIn: 3600,
+                        //jwtid: uuid(),
+                        //issuer: 'AlcoloDico',
+                    });
+
+                return reply.response({
+                    pseudo: user.pseudo,
+                    tokenType: 'JWT',
+                    token: 'Bearer ' + jwtToken,
+                });
+            } else return reply.response({
+                status: 'bad credentials'
+            })
+        }
+    },
+    {
+        method: 'POST',
+        path: '/register',
+        config: {auth: false},
+        handler: async (request, reply) => {
+            let payload = request.payload;
+            console.log(payload);
+            let user1 = await User.findOne({where: {mail: payload.mail}});
+            let user2 = await User.findOne({where: {pseudo: payload.pseudo}});
+            if (user1 || user2) return reply.response({status: 'bad pseudo or mail'});
+            let user = await User.create({
+                        mail: payload.mail,
+                        password: payload.password,
+                        firstname: payload.firstname,
+                        lastname: payload.lastname,
+                        pseudo: payload.pseudo,
+                        admin: false,
+                }).catch(() => {
+                    return reply.response({
+                        status: 'bad pseudo or mail'})
+                });
+            if (user[0] != null) {
+                const jwtToken = Jwt.sign(user[0].id, 'NeverShareYourSecret',
+                    {
+                        algorithm: 'HS256',
+                        //expiresIn: 3600,
+                        //jwtid: uuid(),
+                        //issuer: 'AlcoloDico',
+                    });
+
+                return reply.response({
+                    name: user[0].pseudo,
+                    tokenType: 'JWT',
+                    token: 'Bearer ' + jwtToken,
+                });
+            } else return reply.response({
+                status: 'bad pseudo or mail'
+            })
+        }
+    },
+    {
+        method: 'GET',
+        path: '/list/{cat}',
+        config: {auth: false},
+        handler: (request) => {
+            return Game.findAll({
+                where: {visible: true},
+                include: [{model: Category, where: {id: request.params.cat}}],
+                order: [['name', 'ASC']],
+            })
+        }
+    },
+    {
+        method: 'GET',
+        path: '/list/new',
+        config: {auth: false},
+        handler: (request) => {
+            return Game.findAll({
+                where: {visible: false},
+                order: [['createdAt', 'DESC']],
+            })
+        }
+    },
+    {
+        method: 'GET',
+        path: '/list',
+        config: {auth: false},
+        handler: (request) => {
+            return Game.findAll({
+                where: {visible: true},
+                include: [{model: Category}],
+                order: [['name', 'ASC']],
+            })
+        }
+    },
+    {
+        method: 'GET',
+        path: '/comments/{id}',
+        config: {auth: false},
+        handler: (request) => {
+            return Comment.findAll({
+                where: {gameId: request.params.id},
+                include: [{model: User}],
+                order: [['createdAt', 'DESC']],
+                limit: 3
+            })
+        }
+    },
+    {
+        method: 'POST',
+        path: '/comment/{id}',
+        config: {auth: 'jwt'},
+        handler: async (request, reply) => {
+            let user = await User.findByPk(request.auth.credentials);
+            if (!user)
+                return reply.response({
+                    name: 'You are not log in'
+                });
+            return Comment.findOne({
+                where: {
+                    gameId: Number(request.params.id),
+                    userId: Number(request.auth.credentials)
+                }
+            }).then((comment) => {
+                if (comment) { // update
+                    return comment.update({
+                        review: request.payload.review,
+                        rate: Number(request.payload.rate),
+                    });
+                } else { // insert
+                    return Comment.create({
+                        gameId: Number(request.params.id),
+                        userId: Number(request.auth.credentials),
+                        review: request.payload.review,
+                        rate: Number(request.payload.rate),
+                    });
+                }
+            })
+        }
+    },
+    {
+        method: 'POST',
+        path:
+            '/add',
+        config:
+            {
+                auth: 'jwt'
+            }
+        ,
+        handler: async (request, reply) => {
+            let user = await User.findByPk(request.auth.credentials);
+            if (!user)
+                return reply.response({
+                    name: 'You are not log in'
+                });
+            var game = request.payload;
+            game.rules = game.rules.split('.');
+            for (var i = 0; i < game.rules.length; i++) {
+                if (game.rules[i].length === 0 || game.rules[i] === '') game.rules.splice(i, 1);
+                else {
+                    game.rules[i] += '.';
+                    game.rules[i] = game.rules[i].trim();
+                }
+            }
+            return Game.findOrCreate({
+                where: {name: game.name},
+                defaults: {
+                    rules: game.rules,
+                    preview: game.preview,
+                    images: [game.images],
+                    categoryId: Number(game.category),
+                    visible: false,
+                    userId: request.auth.credentials
+                }
+            });
+        }
+    }
+]
+;
+
+
+/*const init = async () => {
+    await
+        server.start();
+    console.log(`Server running at: ${server.info.uri}`);
+}
+
+process.on('unhandledRejection', (err) => {
+    console.log(err);
+    process.exit(1);
+})
+
+init();*/
