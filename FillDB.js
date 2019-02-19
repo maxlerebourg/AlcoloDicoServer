@@ -251,15 +251,15 @@ Game.belongsTo(User);
 Comment.belongsTo(User);
 Game.hasMany(Comment, {as: 'coms'});
 
-/*User.sync({force: true}).then(()=>
+User.sync({force: true}).then(()=>
     {
         User.findOrCreate({
             where: {pseudo: 'admin', admin: true, id: 1},
             defaults: {firstname: 'Max', lastname: 'Lerebourg', mail: 'maxlerebourg@gmail.com', password: 'password'}
         })
     }
-)*/
-/*Category.sync({force: true}).then(
+);
+Category.sync({force: true}).then(
     () => {
         for (var jeu of ['Cartes', 'Caps','Hess','Balles']) {
             Category.findOrCreate({
@@ -267,11 +267,11 @@ Game.hasMany(Comment, {as: 'coms'});
             })
         }
     }
-)*/
+);
 Comment.sync({force: true}).then(() => {
     Comment.findOrCreate({where: {gameId: 1, userId: 1}, defaults: {review: 'J\'ai adoré ce jeu, un régal', rate: 5}})
-})
-/*Game.sync({force: true}).then(() => {
+});
+Game.sync({force: true}).then(() => {
     for (var jeu of list) {
         Game.findOrCreate({
             where: {id: jeu.id},
@@ -286,6 +286,6 @@ Comment.sync({force: true}).then(() => {
             }
         })
     }
-})*/
+})
 
 

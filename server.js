@@ -7,7 +7,7 @@ const validate = async function (decoded, request) {
         return { isValid: false };
     }
     else {
-        return { isValid: true }; 
+        return { isValid: true };
     }*/
 };
 
