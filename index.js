@@ -71,7 +71,7 @@ module.exports = [
             console.log(payload);
             let user1 = await User.findOne({where: {mail: payload.mail}});
             let user2 = await User.findOne({where: {pseudo: payload.pseudo}});
-            if (user1 || user2) return reply.response({status: 'bad pseudo or mail'});
+            if (user1[0] || user2[0]) return reply.response({status: 'bad pseudo or mail'});
             let user = await User.create({
                         mail: payload.mail,
                         password: payload.password,
