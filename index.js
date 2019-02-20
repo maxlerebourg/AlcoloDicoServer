@@ -35,31 +35,35 @@ Comment.belongsTo(User);
 Game.hasMany(Comment, {as: 'coms'});
 
 
+const login = async function (request, reply) {
+    let payload = request.payload;
+    let user = await User.findOne({where: {mail: payload.mail, password: payload.password}});
+    if (user.id) {
+        const jwtToken = Jwt.sign(user.id, 'NeverShareYourSecret',
+            {
+                algorithm: 'HS256',
+                //expiresIn: 3600,
+                //jwtid: uuid(),
+                //issuer: 'AlcoloDico',
+            });
+
+        return reply.response({
+            pseudo: user.pseudo,
+            tokenType: 'JWT',
+            token: 'Bearer ' + jwtToken,
+        });
+    } else return reply.response({
+        status: 'bad credentials'
+    })
+};
+
 module.exports = [
     {
         method: 'POST',
         path: '/login',
         config: {auth: false},
         handler: async (request, reply) => {
-            let payload = request.payload;
-            let user = await User.findOne({where: {mail: payload.mail, password: payload.password}});
-            if (user.id) {
-                const jwtToken = Jwt.sign(user.id, 'NeverShareYourSecret',
-                    {
-                        algorithm: 'HS256',
-                        //expiresIn: 3600,
-                        //jwtid: uuid(),
-                        //issuer: 'AlcoloDico',
-                    });
-
-                return reply.response({
-                    pseudo: user.pseudo,
-                    tokenType: 'JWT',
-                    token: 'Bearer ' + jwtToken,
-                });
-            } else return reply.response({
-                status: 'bad credentials'
-            })
+            return this.login(request, reply);
         }
     },
     {
@@ -71,32 +75,16 @@ module.exports = [
             console.log(payload);
             let user1 = await User.findOne({where: {mail: payload.mail}});
             let user2 = await User.findOne({where: {pseudo: payload.pseudo}});
-            if (user1.id || user2.id) return reply.response({status: 'bad pseudo or mail'});
-            let user = await User.create({
-                        mail: payload.mail,
-                        password: payload.password,
-                        firstname: payload.firstname,
-                        lastname: payload.lastname,
-                        pseudo: payload.pseudo,
-                        admin: false,
-                });
-            if (user[0] != null) {
-                const jwtToken = Jwt.sign(user[0].id, 'NeverShareYourSecret',
-                    {
-                        algorithm: 'HS256',
-                        //expiresIn: 3600,
-                        //jwtid: uuid(),
-                        //issuer: 'AlcoloDico',
-                    });
-
-                return reply.response({
-                    name: user[0].pseudo,
-                    tokenType: 'JWT',
-                    token: 'Bearer ' + jwtToken,
-                });
-            } else return reply.response({
-                status: 'bad pseudo or mail'
-            })
+            if (user1 || user2) return reply.response({status: 'bad pseudo or mail'});
+            await User.create({
+                mail: payload.mail,
+                password: payload.password,
+                firstname: payload.firstname,
+                lastname: payload.lastname,
+                pseudo: payload.pseudo,
+                admin: false,
+            });
+            return login(request, reply)
         }
     },
     {
