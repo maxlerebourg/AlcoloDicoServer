@@ -79,9 +79,6 @@ module.exports = [
                         lastname: payload.lastname,
                         pseudo: payload.pseudo,
                         admin: false,
-                }).catch(() => {
-                    return reply.response({
-                        status: 'bad pseudo or mail'})
                 });
             if (user[0] != null) {
                 const jwtToken = Jwt.sign(user[0].id, 'NeverShareYourSecret',
