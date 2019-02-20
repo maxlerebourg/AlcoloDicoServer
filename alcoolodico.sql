@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le :  mer. 20 fév. 2019 à 00:22
+-- Généré le :  mer. 20 fév. 2019 à 00:36
 -- Version du serveur :  5.7.19
 -- Version de PHP :  7.1.9
 
@@ -21,6 +21,58 @@ SET time_zone = "+00:00";
 --
 -- Base de données :  `alcoolodico`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `categories`
+--
+
+DROP TABLE IF EXISTS `categories`;
+CREATE TABLE IF NOT EXISTS `categories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) DEFAULT NULL,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
+
+--
+-- Déchargement des données de la table `categories`
+--
+
+INSERT INTO `categories` (`id`, `name`, `createdAt`, `updatedAt`) VALUES
+(1, 'cartes', '2019-02-16 11:56:56', '2019-02-16 11:56:56'),
+(2, 'caps', '2019-02-16 11:56:56', '2019-02-16 11:56:56'),
+(3, 'hess', '2019-02-16 11:56:56', '2019-02-16 11:56:56'),
+(4, 'balles', '2019-02-16 11:56:56', '2019-02-16 11:56:56');
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `comments`
+--
+
+DROP TABLE IF EXISTS `comments`;
+CREATE TABLE IF NOT EXISTS `comments` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `rate` int(11) DEFAULT NULL,
+  `review` text,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  `userId` int(11) DEFAULT NULL,
+  `gameId` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `userId` (`userId`),
+  KEY `gameId` (`gameId`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+
+--
+-- Déchargement des données de la table `comments`
+--
+
+INSERT INTO `comments` (`id`, `rate`, `review`, `createdAt`, `updatedAt`, `userId`, `gameId`) VALUES
+(1, 5, 'J\'ai adoré ce jeu, un régal', '2019-02-19 18:50:06', '2019-02-19 18:50:06', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -69,9 +121,47 @@ INSERT INTO `games` (`id`, `name`, `preview`, `rules`, `images`, `visible`, `cre
 (17, 'Le 21 ', 'Un jeu joué par les gogoles, inventé par un gogole.', 'A tour de rôle, les joueurs disent entre 1 et 3 nombres.Dire 2 nombre provoque un changement de sens.Vous ne devez jamais répété le dernier nombre dit sous peine d\'une gorgée.Celui arrivant à 21 bois et ajoute une règle.', 'https://s2.qwant.com/thumbr/0x380/f/2/6fcaa64bd770a5b171bbd91c0f543c74a5e659a8fa0a807d07d2a8936216e1/21plus.jpg?u=http%3A%2F%2Fwww2.uwstout.edu%2Fcontent%2Fhousing%2FSmart%26HealthyWeb%2Fimages%2F21plus%2F21plus.jpg&q=0&b=1&p=0&a=1', 1, '2019-02-19 18:49:18', '2019-02-19 18:49:18', 3, 1),
 (18, 'Picard', 'Similaire à la Marmotte mais des règles différentes', 'Les joueurs jouent chacun leur tour.Ils ont 4 cartes devant eux dont 2 inconnus.Le joueur qui joue pioche une carte.Il décide ensuite, soit de la défausser, soit de la remplacer par l\'une des quatres cartes présentes devant lui.Le joueur qui pense avoir 10 points ou moins dis \\\"STOP\\\".Il reste alors un tour..', 'https://s2.qwant.com/thumbr/0x380/f/7/0fa17c2b9d6bbe7a0bcb11d88d3e4cf8babd88cccc48e5b1329f751ab9fc57/mini-jeu-cartes-p151184~1.jpg?u=http%3A%2F%2Fwww.mega-fetes.fr%2Fimages-produits%2Fmini-jeu-cartes-p151184%7E1.jpg&q=0&b=1&p=0&a=1', 1, '2019-02-19 18:49:18', '2019-02-19 18:49:18', 1, 1);
 
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `users`
+--
+
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `pseudo` varchar(255) DEFAULT NULL,
+  `firstname` varchar(255) DEFAULT NULL,
+  `lastname` varchar(255) DEFAULT NULL,
+  `mail` varchar(255) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `admin` tinyint(1) DEFAULT NULL,
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `pseudo` (`pseudo`),
+  UNIQUE KEY `mail` (`mail`)
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
+
+--
+-- Déchargement des données de la table `users`
+--
+
+INSERT INTO `users` (`id`, `pseudo`, `firstname`, `lastname`, `mail`, `password`, `admin`, `createdAt`, `updatedAt`) VALUES
+(1, 'admin', 'Max', 'Lerebourg', 'maxlerebourg@gmail.com', 'password', 1, '2019-02-16 11:52:23', '2019-02-16 11:52:23'),
+(2, 'Clarouille', 'Clara', 'Laumond', 'clara.laumond@gmail.com', 'password', 0, '2019-02-18 22:33:12', '2019-02-18 22:33:12'),
+(3, 'JohnDoe', 'John', 'Doe', 'johndoe@gmail.com', 'password', 0, '2019-02-19 11:09:02', '2019-02-19 11:09:02');
+
 --
 -- Contraintes pour les tables déchargées
 --
+
+--
+-- Contraintes pour la table `comments`
+--
+ALTER TABLE `comments`
+  ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`gameId`) REFERENCES `games` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Contraintes pour la table `games`
