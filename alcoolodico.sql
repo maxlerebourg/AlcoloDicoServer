@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1:3306
--- Généré le :  mar. 19 fév. 2019 à 18:52
+-- Généré le :  mer. 20 fév. 2019 à 00:22
 -- Version du serveur :  5.7.19
 -- Version de PHP :  7.1.9
 
@@ -21,58 +21,6 @@ SET time_zone = "+00:00";
 --
 -- Base de données :  `alcoolodico`
 --
-
--- --------------------------------------------------------
-
---
--- Structure de la table `categories`
---
-
-DROP TABLE IF EXISTS `categories`;
-CREATE TABLE IF NOT EXISTS `categories` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) DEFAULT NULL,
-  `createdAt` datetime NOT NULL,
-  `updatedAt` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=latin1;
-
---
--- Déchargement des données de la table `categories`
---
-
-INSERT INTO `categories` (`id`, `name`, `createdAt`, `updatedAt`) VALUES
-(1, 'cartes', '2019-02-16 11:56:56', '2019-02-16 11:56:56'),
-(2, 'caps', '2019-02-16 11:56:56', '2019-02-16 11:56:56'),
-(3, 'hess', '2019-02-16 11:56:56', '2019-02-16 11:56:56'),
-(4, 'balles', '2019-02-16 11:56:56', '2019-02-16 11:56:56');
-
--- --------------------------------------------------------
-
---
--- Structure de la table `comments`
---
-
-DROP TABLE IF EXISTS `comments`;
-CREATE TABLE IF NOT EXISTS `comments` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `rate` int(11) DEFAULT NULL,
-  `review` text,
-  `createdAt` datetime NOT NULL,
-  `updatedAt` datetime NOT NULL,
-  `userId` int(11) DEFAULT NULL,
-  `gameId` int(11) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `userId` (`userId`),
-  KEY `gameId` (`gameId`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
-
---
--- Déchargement des données de la table `comments`
---
-
-INSERT INTO `comments` (`id`, `rate`, `review`, `createdAt`, `updatedAt`, `userId`, `gameId`) VALUES
-(1, 5, 'J\'ai adoré ce jeu, un régal', '2019-02-19 18:50:06', '2019-02-19 18:50:06', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -107,7 +55,7 @@ INSERT INTO `games` (`id`, `name`, `preview`, `rules`, `images`, `visible`, `cre
 (3, 'Main Verte', 'Un jeu amusant avec un semblant de stratégie pour boire malin. ', '6-7 cartes sont distribuées à chacun des joueurs suivant le nombre de participants.Le reste des cartes non distribuées constitue la pioche.Une carte est posée face visible à côté de celle-ci, elle constitue ce qui sera la defausse.Le but est d\'avoir le moins de points possibles.Chaque joueur joue chacun son tour dans le sens des aiguilles d\'une montre.Il se defausse d\'ABORD d\'une carte ou plusieurs en envoyant soit une carte simple, un double, un triple, un carré ou une suite de même signe.Puis il pioche soit sur la pioche, soit sur la defausse.Lorsqu\'une carte est posée sur la defausse, les joueurs peuvent deffauser la même carte.Quand un joueur pense avoir moins de points que les autres, il dit \\\"Main Verte\\\" à la fin de son tour de jeu, un dernier tour doit être fait.A la fin de ce tour, les joueurs comptent leurs points.Si le gagnant n\'est pas celui qui l\'a annoncé, il double ses gorgées à prendre, les autres boivent.Les roi rouges valent 0. Les autres têtes valent 10Bonne pioche autorisée (carte piochée qui peut être joué directement sur vous même).', 'https://melusine.eu.org/syracuse/metapost/vrac/cartes/cartes-2.png', 1, '2019-02-19 18:49:18', '2019-02-19 18:49:18', 1, 1),
 (4, 'Hold\'em Poker Gorgée', 'Dans ce jeu, seul vos couilles s\'exprimeront, un jeu où il vaut mieux être avertie et attention au 70 gorgées qui peuvent tomber.', '2 cartes sont distribuées à chacun. Et 3 cartes sont positionnées au milieu face visibleLe jeu se déroule en 3 phases. Chacune est un tour où les joueurs font augmenter les gorgées en jeuA chaque phase, on pose une carte face visible sur la table.Le gagnant est soit le dernier en jeu, soit selon les règles de classement.Tous les autres boivent le nombre de gorgées qu\'ils ont misé jusqu\'a ce qu\'ils perdent ou qu\'ils abandonnent.', 'http://www.regoledelgioco.com/wp-content/uploads/2011/03/texas_hold_em-1024x603.jpg', 1, '2019-02-19 18:49:18', '2019-02-19 18:49:18', 1, 1),
 (5, 'Pyramide', 'Amusant en début de soirée, la pyramide saura ambiancer vos débuts de soirée difficile.', 'Le jeu se déroule en deux partie. La première où les cartes sont distribuées, et la seconde où la pyramide est visitée.On demande aux joueurs, l\'un après l\'autre : \\\"Rouge ou noir\\\", si il a bon il distribue 1 gorgée, sinon il en prend 1.Puis \\\"Plus ou moins\\\" que la carte précédente, si il a bon il distribue 2 gorgées, sinon il en prend 2.Puis \\\"Intérieur ou extérieur\\\" que les deux cartes précédentes, si il a bon il distribue 3 gorgées, sinon il en prend 3.Et enfin \\\"Carreau, Coeur, Pique ou Trèfle\\\", si il a bon il distribue 4 gorgées, sinon il en prend 4.Les cartes restantes sont disposées en pyramide.Les joueurs doivent retenir leurs cartes et les posées face cachée devant eux.On retournera les cartes une par une de la pyramide.Chaque étage compte pour 2 gorgées supplémentaires, le dernier vaut cul sec.Si un des joueurs possède une carte qui vient d\'être retournée, il désigne quelqu\'un qui doit boire.Le joueur attaqué boit ou dit \\\"Menteur\\\".Si il dit \\\"Menteur\\\" et que le joueur qui attaque a bien menti, l\'attaquant boit le double des gorgées distribuées, sinon c\'est l\'attaqué.A la fin, les joueurs retournent leurs cartes en énonçant leur valeur, c\'est 4 gorgées par faute.', 'https://www.jeux-alcool.com/wp-content/uploads/2013/04/pyramide-732x380.jpg', 1, '2019-02-19 18:49:18', '2019-02-19 18:49:18', 1, 1),
-(6, '81', 'Un jeu pour des soirées posées entre amis. Il mettra tout le monde d\'accord pour sa simplicité.', 'On distribue 2 cartes a chaque joueur.Tour à tour, les joueurs mettent une carte sur la défausse et en pioche une.A chaque carte posée, on incrémente de la valeur de la carte le compteur commun.Il ne faut pas dépasser 81.Vous devez boire à chaque dizaine (10, 20...), celui qui dépasse 81 boit 5 gorgées.L\'as vaut 1 ou 11.Le valet vaut -10La dame change de sens et contre les gorgées en jeu.Le roi passe le compteur à 70.', 'https://melusine.eu.org/syracuse/metapost/vrac/cartes/cartes-2.png', 1, '2019-02-19 18:49:18', '2019-02-19 18:49:18', 1, 1),
+(6, '81', 'Un jeu pour des soirées posées entre amis. Il mettra tout le monde d\'accord pour sa simplicité.', 'On distribue 2 cartes a chaque joueur.Tour à tour, les joueurs mettent une carte sur la défausse et en pioche une.A chaque carte posée, on incrémente de la valeur de la carte le compteur commun.Il ne faut pas dépasser 81.Vous devez boire à chaque dizaine (10, 20, etc), celui qui dépasse 81 boit 5 gorgées.L\'as vaut 1 ou 11.Le valet vaut -10.La dame change de sens et contre les gorgées en jeu.Le roi passe le compteur à 70.', 'https://melusine.eu.org/syracuse/metapost/vrac/cartes/cartes-2.png', 1, '2019-02-19 18:49:18', '2019-02-19 18:49:18', 1, 1),
 (7, 'Caps', 'Jeu préféré des étudiants et c\'est le cas de le dire. Des dizaines de tournois sont organisés et finisse par le vomis du perdant.', 'Deux bieres pleines, Trois capsules.Posez une capsule à l\'envers sur la bière de chacun des participants.Tour à tour, lancez la caps pour faire tomber celle des autres.Celui dont la capsule tombe à le droit de contrer, si il n\'y arrive pas, il boit.Officiellement, une bière constitue 8 gorgées, bonne chance.', 'http://les-jeunes-et-lalcool.e-monsite.com/medias/images/1920071-1432387433677629-3326200423773758817-n.jpg', 1, '2019-02-19 18:49:18', '2019-02-19 18:49:18', 2, 1),
 (8, '2Caps', 'Jeu des soirées où il fait froid, où vous n\'avez vraiment plus d\'idée ou quoique ce soit d\'autre à faire. Un bon jeu presque sans matériel.', 'Deux capsules.Tour à tour, lancez les deux capsules.Si l\'une est face cachée et l\'autre vible, une gorgée est stockée.Si les deux tombent face contre le sol, celui qui a lancé boit le nombre de gorgées stockée.Si les deux tombent face visible, celui qui a lancé distribue le nombre de gorgées stockée.', 'https://biere-boutique.fr/409-tm_large_default/capsules-26-mm-rouge.jpg', 1, '2019-02-19 18:49:18', '2019-02-19 18:49:18', 2, 1),
 (9, 'Jeux de la hess', 'Un jeu technique et vraiment amusant lorsque la soirée commence à être bien arrosée. Trouvez un signe et c\'est partie pour de longues parties endiablées.', 'Chaque joueur choisi un signe et le montre aux autres.Le perdant ou le désigné lance le rythme des claps.A un moment, il doit faire son signe sur un temps, puis le signe d\'un camarade sur un autre temps.Si la personne ne remarque pas, il boit et relance le rythme.Si il le remarque, il doit faire son signe puis celui d\'un autre sur deux temps différents et ainsi de suite.', 'https://i.kym-cdn.com/entries/icons/original/000/021/012/clap_pzfqtq.jpg', 1, '2019-02-19 18:49:18', '2019-02-19 18:49:18', 3, 1),
@@ -121,47 +69,9 @@ INSERT INTO `games` (`id`, `name`, `preview`, `rules`, `images`, `visible`, `cre
 (17, 'Le 21 ', 'Un jeu joué par les gogoles, inventé par un gogole.', 'A tour de rôle, les joueurs disent entre 1 et 3 nombres.Dire 2 nombre provoque un changement de sens.Vous ne devez jamais répété le dernier nombre dit sous peine d\'une gorgée.Celui arrivant à 21 bois et ajoute une règle.', 'https://s2.qwant.com/thumbr/0x380/f/2/6fcaa64bd770a5b171bbd91c0f543c74a5e659a8fa0a807d07d2a8936216e1/21plus.jpg?u=http%3A%2F%2Fwww2.uwstout.edu%2Fcontent%2Fhousing%2FSmart%26HealthyWeb%2Fimages%2F21plus%2F21plus.jpg&q=0&b=1&p=0&a=1', 1, '2019-02-19 18:49:18', '2019-02-19 18:49:18', 3, 1),
 (18, 'Picard', 'Similaire à la Marmotte mais des règles différentes', 'Les joueurs jouent chacun leur tour.Ils ont 4 cartes devant eux dont 2 inconnus.Le joueur qui joue pioche une carte.Il décide ensuite, soit de la défausser, soit de la remplacer par l\'une des quatres cartes présentes devant lui.Le joueur qui pense avoir 10 points ou moins dis \\\"STOP\\\".Il reste alors un tour..', 'https://s2.qwant.com/thumbr/0x380/f/7/0fa17c2b9d6bbe7a0bcb11d88d3e4cf8babd88cccc48e5b1329f751ab9fc57/mini-jeu-cartes-p151184~1.jpg?u=http%3A%2F%2Fwww.mega-fetes.fr%2Fimages-produits%2Fmini-jeu-cartes-p151184%7E1.jpg&q=0&b=1&p=0&a=1', 1, '2019-02-19 18:49:18', '2019-02-19 18:49:18', 1, 1);
 
--- --------------------------------------------------------
-
---
--- Structure de la table `users`
---
-
-DROP TABLE IF EXISTS `users`;
-CREATE TABLE IF NOT EXISTS `users` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `pseudo` varchar(255) DEFAULT NULL,
-  `firstname` varchar(255) DEFAULT NULL,
-  `lastname` varchar(255) DEFAULT NULL,
-  `mail` varchar(255) DEFAULT NULL,
-  `password` varchar(255) DEFAULT NULL,
-  `admin` tinyint(1) DEFAULT NULL,
-  `createdAt` datetime NOT NULL,
-  `updatedAt` datetime NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `pseudo` (`pseudo`),
-  UNIQUE KEY `mail` (`mail`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=latin1;
-
---
--- Déchargement des données de la table `users`
---
-
-INSERT INTO `users` (`id`, `pseudo`, `firstname`, `lastname`, `mail`, `password`, `admin`, `createdAt`, `updatedAt`) VALUES
-(1, 'admin', 'Max', 'Lerebourg', 'maxlerebourg@gmail.com', 'password', 1, '2019-02-16 11:52:23', '2019-02-16 11:52:23'),
-(2, 'Clarouille', 'Clara', 'Laumond', 'clara.laumond@gmail.com', 'password', 0, '2019-02-18 22:33:12', '2019-02-18 22:33:12'),
-(3, 'JohnDoe', 'John', 'Doe', 'johndoe@gmail.com', 'password', 0, '2019-02-19 11:09:02', '2019-02-19 11:09:02');
-
 --
 -- Contraintes pour les tables déchargées
 --
-
---
--- Contraintes pour la table `comments`
---
-ALTER TABLE `comments`
-  ADD CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`gameId`) REFERENCES `games` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Contraintes pour la table `games`
