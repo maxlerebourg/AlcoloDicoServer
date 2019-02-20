@@ -1,5 +1,6 @@
 const Hapi = require('hapi');
 const routes = require('./index');
+const config = require('./config');
 
 const validate = async function (decoded, request) {
     return { isValid: true };
@@ -14,7 +15,7 @@ const validate = async function (decoded, request) {
 const init = async () => {
     const server = Hapi.server({
         port: 3000,
-        host: '192.168.1.16'
+        host: config.url
     });
     // include our module here ↓↓
     await server.register(require('hapi-auth-jwt2'));
