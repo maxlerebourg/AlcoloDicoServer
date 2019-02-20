@@ -1,8 +1,9 @@
 const Jwt = require('jsonwebtoken');
 const uuid = require("uuid/v1");
+const config = require('./config');
 
 const Sequelize = require('sequelize');
-const sequelize = new Sequelize('mysql://root:@127.0.0.1:3306/alcoolodico');
+const sequelize = new Sequelize('mysql://root:'+config.mdp+'@127.0.0.1:3306/'+config.db);
 sequelize.authenticate();
 
 const Game = sequelize.define('games', {
@@ -193,6 +194,7 @@ module.exports = [
                     name: 'You are not log in'
                 });
             var game = request.payload;
+            console.log(game);
             return Game.findOrCreate({
                 where: {name: game.name},
                 defaults: {
