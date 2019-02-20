@@ -185,11 +185,7 @@ module.exports = [
         method: 'POST',
         path:
             '/add',
-        config:
-            {
-                auth: 'jwt'
-            }
-        ,
+        config: {auth: 'jwt'},
         handler: async (request, reply) => {
             let user = await User.findByPk(request.auth.credentials);
             if (!user)
@@ -197,20 +193,12 @@ module.exports = [
                     name: 'You are not log in'
                 });
             var game = request.payload;
-            game.rules = game.rules.split('.');
-            for (var i = 0; i < game.rules.length; i++) {
-                if (game.rules[i].length === 0 || game.rules[i] === '') game.rules.splice(i, 1);
-                else {
-                    game.rules[i] += '.';
-                    game.rules[i] = game.rules[i].trim();
-                }
-            }
             return Game.findOrCreate({
                 where: {name: game.name},
                 defaults: {
                     rules: game.rules,
                     preview: game.preview,
-                    images: [game.images],
+                    images: game.images,
                     categoryId: Number(game.category),
                     visible: false,
                     userId: request.auth.credentials
