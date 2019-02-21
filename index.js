@@ -9,8 +9,8 @@ sequelize.authenticate();
 const Game = sequelize.define('games', {
     name: {type: Sequelize.STRING},
     preview: {type: Sequelize.TEXT},
-    rules: {type: Sequelize.JSON},
-    images: {type: Sequelize.JSON},
+    rules: {type: Sequelize.TEXT},
+    images: {type: Sequelize.TEXT},
     visible: {type: Sequelize.BOOLEAN},
 });
 const User = sequelize.define('users', {
@@ -56,6 +56,9 @@ const login = async function (request, reply) {
         status: 'bad credentials'
     })
 };
+const getUser = async function(request){
+
+}
 
 module.exports = [
     {
