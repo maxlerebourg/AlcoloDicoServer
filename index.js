@@ -66,7 +66,7 @@ module.exports = [
         path: '/login',
         config: {auth: false},
         handler: async (request, reply) => {
-            return this.login(request, reply);
+            return login(request, reply);
         }
     },
     {
