@@ -165,6 +165,7 @@ module.exports = [
                         userId: Number(request.auth.credentials),
                         review: request.payload.review,
                         rate: Number(request.payload.rate),
+                        updatedAt: new Date(),
                     });
                 }
             })
