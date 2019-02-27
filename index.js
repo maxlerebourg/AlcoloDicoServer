@@ -133,7 +133,7 @@ module.exports = [
             return Comment.findAll({
                 where: {gameId: request.params.id},
                 include: [{model: User}],
-                order: [['createdAt', 'DESC']],
+                order: [['updatedAt', 'DESC']],
                 limit: 3
             })
         }
