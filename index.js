@@ -37,7 +37,7 @@ Game.hasMany(Comment, {as: 'coms'});
 
 const login = async function (request, reply) {
     let payload = request.payload;
-    let user = await User.findOne({where: {mail: payload.mail, password: payload.password}, attributes: { exclude: [password]}});
+    let user = await User.findOne({where: {mail: payload.mail, password: payload.password}});
     if (user.id) {
         const jwtToken = Jwt.sign(user.id, 'NeverShareYourSecret',
             {
