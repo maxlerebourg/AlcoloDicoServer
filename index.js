@@ -37,7 +37,7 @@ Game.hasMany(Comment, {as: 'coms'});
 
 const login = async function (request, reply) {
     let payload = request.payload;
-    let user = await User.findOne({where: {mail: payload.mail, password: payload.password}});
+    let user = await User.findOne({where: {mail: payload.mail, password: payload.password}, attributes: { exclude: [password]}});
     if (user.id) {
         const jwtToken = Jwt.sign(user.id, 'NeverShareYourSecret',
             {
@@ -132,7 +132,7 @@ module.exports = [
         handler: (request) => {
             return Comment.findAll({
                 where: {gameId: request.params.id},
-                include: [{model: User}],
+                include: [{model: User, attributes: { exclude: ['password', 'mail', 'firstname', 'lastname'] }}],
                 order: [['updatedAt', 'DESC']],
                 limit: 3
             })
