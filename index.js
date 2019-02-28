@@ -37,8 +37,7 @@ Game.hasMany(Comment, {as: 'coms'});
 
 const login = async function (request, reply) {
     let payload = request.payload;
-    let user = await User.findOne({where: {mail: payload.mail, password: payload.password}});
-    if (user.id) {
+    return User.findOne({where: {mail: payload.mail, password: payload.password}}).then((user)=>{
         const jwtToken = Jwt.sign(user.id, 'NeverShareYourSecret',
             {
                 algorithm: 'HS256',
@@ -52,13 +51,11 @@ const login = async function (request, reply) {
             tokenType: 'JWT',
             token: 'Bearer ' + jwtToken,
         });
-    } else return reply.response({
+    }).catch(() =>{
+        return reply.response({
         status: 'bad credentials'
-    })
+    })})
 };
-const getUser = async function(request){
-
-}
 
 module.exports = [
     {
