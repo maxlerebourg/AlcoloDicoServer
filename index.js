@@ -83,7 +83,7 @@ module.exports = [
         path: '/list',
         config: {auth: false},
         handler: (request) => {
-            return sequelize.query('SELECT g.*, avg(c.rate)  FROM `games` as g LEFT JOIN `comments` AS c ON g.id = c.gameId where g.visible group by g.id');
+            return sequelize.query('SELECT g.*, avg(c.rate) as rate FROM `games` as g LEFT JOIN `comments` AS c ON g.id = c.gameId where g.visible group by g.id');
         }
     },
     {
