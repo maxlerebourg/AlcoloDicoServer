@@ -12,6 +12,14 @@ const Game = sequelize.define('games', {
     images: {type: Sequelize.TEXT},
     visible: {type: Sequelize.BOOLEAN},
 });
+const Cocktail = sequelize.define('cocktails', {
+    name: {type: Sequelize.STRING},
+    preview: {type: Sequelize.TEXT},
+    ingredients: {type: Sequelize.TEXT},
+    recipe: {type: Sequelize.TEXT},
+    images: {type: Sequelize.TEXT},
+    visible: {type: Sequelize.BOOLEAN},
+});
 const User = sequelize.define('users', {
     pseudo: {type: Sequelize.STRING},
     firstname: {type: Sequelize.STRING},
@@ -30,7 +38,8 @@ const Comment = sequelize.define('comments', {
 
 Game.belongsTo(Category);
 Game.belongsTo(User);
+Cocktail.belongsTo(User);
 Comment.belongsTo(User);
 Game.hasMany(Comment, {as: 'coms'});
 
-module.exports = {User, Category, Game, Comment, sequelize};
+module.exports = {User, Category, Game, Comment, Cocktail,  sequelize};

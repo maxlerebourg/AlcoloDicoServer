@@ -1,7 +1,7 @@
 const Jwt = require('jsonwebtoken');
 const uuid = require("uuid/v1");
 
-const {User, Category, Game, Comment, sequelize} = require('./sequelize');
+const {User, Category, Game, Comment, Cocktail, sequelize} = require('./sequelize');
 
 const login = async function (request, reply) {
     let payload = request.payload;
@@ -57,7 +57,7 @@ module.exports = [
     },
     {
         method: 'GET',
-        path: '/list/{cat}',
+        path: '/list/game/{cat}',
         config: {auth: false},
         handler: (request) => {
             return Game.findAll({
@@ -69,7 +69,7 @@ module.exports = [
     },
     {
         method: 'GET',
-        path: '/list/new',
+        path: '/list/game/new',
         config: {auth: false},
         handler: (request) => {
             return Game.findAll({
@@ -80,7 +80,7 @@ module.exports = [
     },
     {
         method: 'GET',
-        path: '/list',
+        path: '/list/game',
         config: {auth: false},
         handler: (request) => {
             return sequelize.query('SELECT g.*, avg(c.rate) as rate FROM `games` as g LEFT JOIN `comments` AS c ON g.id = c.gameId where g.visible group by g.id order by g.name');
@@ -88,7 +88,18 @@ module.exports = [
     },
     {
         method: 'GET',
-        path: '/comments/{id}',
+        path: '/list/cocktail',
+        config: {auth: false},
+        handler: (request) => {
+            return Cocktail.findAll({
+                where: {visible: true},
+                order: [['name', 'ASC']],
+            })
+        }
+    },
+    {
+        method: 'GET',
+        path: '/comments/game/{id}',
         config: {auth: false},
         handler: (request) => {
             return Comment.findAll({
@@ -101,7 +112,7 @@ module.exports = [
     },
     {
         method: 'POST',
-        path: '/comment/{id}',
+        path: '/comment/game/{id}',
         config: {auth: 'jwt'},
         handler: async (request, reply) => {
             let user = await User.findByPk(request.auth.credentials);
@@ -135,7 +146,7 @@ module.exports = [
     {
         method: 'POST',
         path:
-            '/add',
+            '/add/game',
         config: {auth: 'jwt'},
         handler: async (request, reply) => {
             let user = await User.findByPk(request.auth.credentials);
