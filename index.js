@@ -1,11 +1,13 @@
 const Jwt = require('jsonwebtoken');
 const uuid = require("uuid/v1");
+const config = require('./config');
+var requester = require("request-promise");
 
 const {User, Category, Game, Comment, Cocktail, sequelize} = require('./sequelize');
 
 const login = async function (request, reply) {
     let payload = request.payload;
-    return User.findOne({where: {mail: payload.mail, password: payload.password}}).then((user)=>{
+    return User.findOne({where: {mail: payload.mail, password: payload.password}}).then((user) => {
         const jwtToken = Jwt.sign(user.id, 'NeverShareYourSecret',
             {
                 algorithm: 'HS256',
@@ -19,10 +21,11 @@ const login = async function (request, reply) {
             tokenType: 'JWT',
             token: 'Bearer ' + jwtToken,
         });
-    }).catch(() =>{
+    }).catch(() => {
         return reply.response({
-        status: 'bad credentials'
-    })})
+            status: 'bad credentials'
+        })
+    })
 };
 
 module.exports = [
@@ -104,7 +107,7 @@ module.exports = [
         handler: (request) => {
             return Comment.findAll({
                 where: {gameId: request.params.id},
-                include: [{model: User, attributes: { exclude: ['password', 'mail', 'firstname', 'lastname'] }}],
+                include: [{model: User, attributes: {exclude: ['password', 'mail', 'firstname', 'lastname']}}],
                 order: [['updatedAt', 'DESC']],
                 limit: 3
             })
@@ -168,20 +171,126 @@ module.exports = [
                 }
             });
         }
+    },
+    {
+        method: 'GET',
+        path: '/meteo',
+        config: {auth: false},
+        handler: async (request, reply) => {
+            return requester('https://www.infoclimat.fr/public-api/gfs/json?_ll=48.85341,2.3488&_auth=Bx1UQwF%2FByUCL1NkDnhQeVQ8BDFZL1dwUS0BYg1oXiMAa1c2AmIBZwVrBntUe1BmVXgAYwswUmIEb1UtAXNTMgdtVDgBagdgAm1TNg4hUHtUegRlWXlXcFE6AWANfl4%2FAGBXOwJ%2FAWUFawZ6VGVQbFV5AH8LNVJvBGJVMAFlUzMHYVQ1AWUHZwJyUy4OO1A3VG8EMlkzVz5ROwFiDTVeaABiVzYCaQFiBXQGZlRgUGxVZABmCzVSbQRvVS0Bc1NJBxdULQEiBycCOFN3DiNQMVQ5BDA%3D&_c=01b214b2b9f89dc8498f35bfb06ea7bb')
+                .then((data)=>{
+                    data = JSON.parse(data);
+                    if (data['request_state'] === 200){
+                        let today = new Date();
+                        return {temp: data[today.toISOString().substring(0, 10) + ' 22:00:00'].temperature['2m'] - 273};
+                    } else return {temp: false};
+                });
+        }
+    },
+    {
+        method: 'GET',
+        path: '/rendement',
+        config: {auth: false},
+        handler: async (request, reply) => {
+            let rep = [];
+
+            let carrouf = {
+                method: 'GET',
+                url: 'https://www.carrefour.fr/r/boissons-et-cave-a-vins/cave-a-bieres-et-cidres?sort=productSimpleView.pricePerUnitCents&noRedirect=0&page=1',
+                headers: {
+                    Host: 'www.carrefour.fr',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:65.0) Gecko/20100101 Firefox/65.0',
+                    Accept: 'application/json',
+                    'Accept-Language': 'fr,fr-FR;q=0.8,en-US;q=0.5,en;q=0.3',
+                    Referer: 'https://www.carrefour.fr/r/boissons-et-cave-a-vins/cave-a-bieres-et-cidres',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    Connection: 'keep-alive',
+                    TE: 'Trailers',
+                    CacheControl: 'no-cache'
+                }
+            };
+
+            await requester(carrouf)
+                .then(async (body) => {
+                    let data = JSON.parse(body).data;
+                    for (let i of data) {
+                        if(i.attributes.price.perUnit < 1 && i.attributes.title.indexOf('sans alcool') < 0
+                            && i.attributes.title.indexOf('cidre') < 0 && i.attributes.title.indexOf('Cidre') < 0
+                            && i.attributes.title.indexOf('panaché') < 0 && i.attributes.title.indexOf('Panaché') < 0
+                            && i.attributes.title.indexOf('0,0%') < 0
+                        ) {
+                            let product = {
+                                method: 'GET',
+                                url: 'https://www.carrefour.fr/p/'+i.attributes.slug+'-'+i.id,
+                            };
+                            console.log(product.url);
+                            let degree = await requester(product)
+                                .then((body) => {
+                                    let match = body.match(/[1-9]?[0-9][.,]?[1-9]?% vol/);
+                                    return Number(match[0].replace(',','.')
+                                        .replace('%','')
+                                        .replace('vol','')
+                                        .trim());
+                                }).catch((error) => { return error; });
+                            if (degree)
+                                rep.push({
+                                    item: i,
+                                    store: 'Carrefour',
+                                    perUnit: i.attributes.price.perUnit,
+                                    price: i.attributes.price.price,
+                                    title: i.attributes.title,
+                                    brand: i.attributes.brand,
+                                    degree: degree,
+                                    rendement: Number(degree) / Number(i.attributes.price.perUnit)
+                                });
+                        }
+                    }
+                }).catch(() => {
+                    return reply.response({
+                        status: 'error'
+                    })
+                });
+
+            let monop = {
+                method: 'POST',
+                url: 'https://www.monoprix.fr/api/graphql?cache',
+                headers: {
+                    Host: 'www.monoprix.fr',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:65.0) Gecko/20100101 Firefox/65.0',
+                    Accept: 'application/json',
+                    'Accept-Language': 'fr,fr-FR;q=0.8,en-US;q=0.5,en;q=0.3',
+                    Referer: 'https://www.monoprix.fr/courses/search/biere/biere/fbc/Boissons',
+                    'content-type': 'application/json',
+                    Connection: 'keep-alive',
+                },
+                body: {"operationName":"queryProducts","variables":{"from":0,"brandName":[],"price":[],"promotions":[],"productName":"biere","categoryName":"","baseCategoryName":["Boissons"],"sort":["unit_price,asc"]},"query":"query queryProducts($filterCategory: [String], $brandName: [String], $promotions: [String], $price: [String], $sort: [String], $from: Int, $productName: String, $stores: [Int], $matter: [String], $colors: [String], $sizes: [String], $withPromotion: Boolean, $categoryName: String, $baseCategoryName: [String], $tokenSpa: String) {\n  viewer {\n    filters: productsES(category_id: $filterCategory, category_name: $categoryName, promotions: $promotions, price: $price, sort: $sort, from: $from, product_name: $productName, matter: $matter, colors: $colors, sizes: $sizes, size: 24, stores: $stores, withPromotion: $withPromotion) {\n      aggregations {\n        baseCategoriesGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        categoriesGroup {\n          buckets {\n            name\n            total\n            seo_url\n            __typename\n          }\n          __typename\n        }\n        brandsGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        priceRange {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        promotionsGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        compositionGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        colorsGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        sizesGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    productsES(category_id: $filterCategory, category_name: $categoryName, brand_name: $brandName, promotions: $promotions, price: $price, sort: $sort, from: $from, product_name: $productName, matter: $matter, colors: $colors, sizes: $sizes, size: 24, stores: $stores, withPromotion: $withPromotion, base_category_name: $baseCategoryName, tokenSpa: $tokenSpa) {\n      total\n      aggregations {\n        baseCategoriesGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        categoriesGroup {\n          buckets {\n            name\n            total\n            seo_url\n            __typename\n          }\n          __typename\n        }\n        brandsGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        priceRange {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        promotionsGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      results {\n        ...ProductFragment\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment ProductFragment on ProductESItemType {\n  product_id\n  promotions {\n    promotion_id\n    label\n    discount_price\n    cardTypes\n    beginUsable\n    endUsable\n    minimumAmount\n    discount_type\n    itemDescriptor\n    freeShippingValue\n    profil\n    __typename\n  }\n  type\n  universe\n  range\n  brand_name\n  product_name\n  category_name\n  price\n  originalPrice\n  conditioning\n  max_quantity\n  unit\n  unit_price\n  has_image\n  is_web\n  isSpa\n  landing_page_url_spa\n  add_to_cart_page_url_spa\n  image_url_spa\n  image {\n    small\n    medium\n    big\n    __typename\n  }\n  colors {\n    images {\n      medium\n      big\n      __typename\n    }\n    __typename\n  }\n  ean\n  __typename\n}\n"}
+                , json: true
+            };
+            await requester(monop)
+                .then(async (body) => {
+                    console.log('succes');
+                    for (let i of body.data.viewer.productsES.results) {
+                        //console.log(i);
+                        if(i.product_name.search(/[1-9]?[0-9][.,]?[1-9]?/) > 0) {
+                            let match = i.product_name.match(/[1-9]?[0-9][.,]?[1-9]?/);
+                            rep.push({
+                                item: i,
+                                store: 'Monoprix',
+                                perUnit: i.unit_price,
+                                price: i.price,
+                                title: i.product_name,
+                                brand: i.brand_name,
+                                degree: Number(match[0].replace(',','.')),
+                                rendement: Number(match[0].replace(',','.')) / Number(i.unit_price),
+                            });
+                        }
+                    }
+                }).catch(()=>{
+                    return reply.response({
+                        status: 'error'
+                    })
+                });
+            return rep;
+        }
     }
-]
-;
-
-
-/*const init = async () => {
-    await
-        server.start();
-    console.log(`Server running at: ${server.info.uri}`);
-}
-
-process.on('unhandledRejection', (err) => {
-    console.log(err);
-    process.exit(1);
-})
-
-init();*/
+];
