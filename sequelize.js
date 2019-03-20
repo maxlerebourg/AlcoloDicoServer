@@ -22,8 +22,8 @@ const Cocktail = sequelize.define('cocktails', {
 });
 const Beer = sequelize.define('beers', {
     name: {type: Sequelize.STRING},
-    alcool: {type: Sequelize.DOUBLE(2,1)},
-    price: {type: Sequelize.DOUBLE(2,2)},
+    alcool: {type: Sequelize.DOUBLE},
+    price: {type: Sequelize.DOUBLE},
     origin: {type: Sequelize.TEXT},
     images: {type: Sequelize.TEXT},
 });
