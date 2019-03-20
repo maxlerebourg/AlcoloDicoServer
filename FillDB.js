@@ -433,6 +433,7 @@ const Beer = sequelize.define('beers', {
     price: {type: Sequelize.DOUBLE},
     origin: {type: Sequelize.TEXT},
     images: {type: Sequelize.TEXT},
+    brand: {type: Sequelize.TEXT},
 });
 const User = sequelize.define('users', {
     pseudo: {type: Sequelize.STRING},
