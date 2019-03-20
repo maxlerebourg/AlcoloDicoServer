@@ -20,7 +20,7 @@ const Cocktail = sequelize.define('cocktails', {
     images: {type: Sequelize.TEXT},
     visible: {type: Sequelize.BOOLEAN},
 });
-const Beer = sequelize.define('Beers', {
+const Beer = sequelize.define('beers', {
     name: {type: Sequelize.STRING},
     alcool: {type: Sequelize.DOUBLE(2,1)},
     price: {type: Sequelize.DOUBLE(2,2)},
