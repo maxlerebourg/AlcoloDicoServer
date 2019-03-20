@@ -109,7 +109,7 @@ module.exports = [
         config: {auth: false},
         handler: (request) => {
             return Beer.findOne({
-                order: 'rand()',
+                order: [[sequelize.literal('RAND()')]],
             })
         }
     },
