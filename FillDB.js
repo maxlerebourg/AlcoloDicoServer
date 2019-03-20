@@ -398,7 +398,15 @@ const cock = [
         "visible": "1",
         "userId": "1"
     }];
-
+const beer = [{
+    name: "Maximator",
+    origin: "Hollande",
+    price: 1.69,
+    image: "https://s2.qwant.com/thumbr/0x380/5/a/44654806ea6fd14c57382ac8ec598c1fd3b45f923b55ae86ed439996388652/3697393_900.jpg?u=https%3A%2F%2Fimg.coopathome.ch%2Fprodukte%2F880_880%2FRGB%2F3697393_900.jpg%3F_%3D1510228626827&q=0&b=1&p=0&a=1",
+    alcool: 11.6,
+    brand : "Amsterdam",
+    userId: 1
+}];
 
 const Sequelize = require('sequelize');
 const sequelize = new Sequelize('mysql://root:@127.0.0.1:3306/alcoolodico');
@@ -419,10 +427,10 @@ const Cocktail = sequelize.define('cocktails', {
     images: {type: Sequelize.TEXT},
     visible: {type: Sequelize.BOOLEAN},
 });
-const Biere = sequelize.define('bieres', {
+const Beer = sequelize.define('beers', {
     name: {type: Sequelize.STRING},
-    alcool: {type: Sequelize.DOUBLE(2,1)},
-    prix: {type: Sequelize.DOUBLE(2,2)},
+    alcool: {type: Sequelize.DOUBLE},
+    price: {type: Sequelize.DOUBLE},
     origin: {type: Sequelize.TEXT},
     images: {type: Sequelize.TEXT},
 });
@@ -445,7 +453,7 @@ const Comment = sequelize.define('comments', {
 Game.belongsTo(Category);
 Game.belongsTo(User);
 Cocktail.belongsTo(User);
-Biere.belongsTo(User);
+Beer.belongsTo(User);
 Comment.belongsTo(User);
 Game.hasMany(Comment, {as: 'coms'});
 
@@ -503,9 +511,9 @@ Cocktail.sync({force: true}).then(() => {
         })
     }
 });*/
-Biere.sync({force: true}).then(() => {
+Beer.sync({force: true}).then(() => {
     for (let i of beer){
-        Comment.findOrCreate({
+        Beer.findOrCreate({
             where: {id: i.id, userId: 1},
             defaults: {
                 price: i.price,
@@ -513,7 +521,8 @@ Biere.sync({force: true}).then(() => {
                 brand: i.brand,
                 alcool: i.alcool,
                 origin: i.origin,
-                images: i.image
+                images: i.image,
+                userId: 1,
             }})
     }
 

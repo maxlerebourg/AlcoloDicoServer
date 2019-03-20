@@ -20,7 +20,7 @@ const Cocktail = sequelize.define('cocktails', {
     images: {type: Sequelize.TEXT},
     visible: {type: Sequelize.BOOLEAN},
 });
-const Biere = sequelize.define('bieres', {
+const Beer = sequelize.define('Beers', {
     name: {type: Sequelize.STRING},
     alcool: {type: Sequelize.DOUBLE(2,1)},
     prix: {type: Sequelize.DOUBLE(2,2)},
@@ -46,8 +46,8 @@ const Comment = sequelize.define('comments', {
 Game.belongsTo(Category);
 Game.belongsTo(User);
 Cocktail.belongsTo(User);
-Biere.belongsTo(User);
+Beer.belongsTo(User);
 Comment.belongsTo(User);
 Game.hasMany(Comment, {as: 'coms'});
 
-module.exports = {User, Category, Game, Comment, Cocktail, Biere,  sequelize};
+module.exports = {User, Category, Game, Comment, Cocktail, Beer,  sequelize};

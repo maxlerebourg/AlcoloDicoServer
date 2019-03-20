@@ -3,7 +3,7 @@ const uuid = require("uuid/v1");
 const config = require('./config');
 var requester = require("request-promise");
 
-const {User, Category, Game, Comment, Cocktail, Biere, sequelize} = require('./sequelize');
+const {User, Category, Game, Comment, Cocktail, Beer, sequelize} = require('./sequelize');
 
 
 var meteo = {date: '', json: []};
@@ -108,9 +108,8 @@ module.exports = [
         path: '/beer',
         config: {auth: false},
         handler: (request) => {
-            return Cocktail.findAll({
-                where: {visible: true},
-                order: [['name', 'ASC']],
+            return Beer.findOne({
+                order: 'rand()',
             })
         }
     },
@@ -192,7 +191,6 @@ module.exports = [
         config: {auth: false},
         handler: async (request, reply) => {
             let today = new Date().toISOString().substring(0, 10);
-            console.log('toaday: '+today+', meteo.date: '+meteo.date);
             if (meteo.date === today){
                 return {new: false, temp: meteo.json[today + ' 22:00:00'].temperature['2m'] - 273}
             } else {
