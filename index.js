@@ -3,7 +3,10 @@ const uuid = require("uuid/v1");
 const config = require('./config');
 var requester = require("request-promise");
 
-const {User, Category, Game, Comment, Cocktail, sequelize} = require('./sequelize');
+const {User, Category, Game, Comment, Cocktail, Biere, sequelize} = require('./sequelize');
+
+
+var meteo = {date: '', json: []};
 
 const login = async function (request, reply) {
     let payload = request.payload;
@@ -102,6 +105,17 @@ module.exports = [
     },
     {
         method: 'GET',
+        path: '/beer',
+        config: {auth: false},
+        handler: (request) => {
+            return Cocktail.findAll({
+                where: {visible: true},
+                order: [['name', 'ASC']],
+            })
+        }
+    },
+    {
+        method: 'GET',
         path: '/comments/game/{id}',
         config: {auth: false},
         handler: (request) => {
@@ -177,14 +191,20 @@ module.exports = [
         path: '/meteo',
         config: {auth: false},
         handler: async (request, reply) => {
-            return requester('https://www.infoclimat.fr/public-api/gfs/json?_ll=48.85341,2.3488&_auth=Bx1UQwF%2FByUCL1NkDnhQeVQ8BDFZL1dwUS0BYg1oXiMAa1c2AmIBZwVrBntUe1BmVXgAYwswUmIEb1UtAXNTMgdtVDgBagdgAm1TNg4hUHtUegRlWXlXcFE6AWANfl4%2FAGBXOwJ%2FAWUFawZ6VGVQbFV5AH8LNVJvBGJVMAFlUzMHYVQ1AWUHZwJyUy4OO1A3VG8EMlkzVz5ROwFiDTVeaABiVzYCaQFiBXQGZlRgUGxVZABmCzVSbQRvVS0Bc1NJBxdULQEiBycCOFN3DiNQMVQ5BDA%3D&_c=01b214b2b9f89dc8498f35bfb06ea7bb')
-                .then((data)=>{
-                    data = JSON.parse(data);
-                    if (data['request_state'] === 200){
-                        let today = new Date();
-                        return {temp: data[today.toISOString().substring(0, 10) + ' 22:00:00'].temperature['2m'] - 273};
-                    } else return {temp: false};
-                });
+            let today = new Date().toISOString().substring(0, 10);
+            console.log('toaday: '+today+', meteo.date: '+meteo.date);
+            if (meteo.date === today){
+                return {new: false, temp: meteo.json[today + ' 22:00:00'].temperature['2m'] - 273}
+            } else {
+                return requester('https://www.infoclimat.fr/public-api/gfs/json?_ll=48.85341,2.3488&_auth=Bx1UQwF%2FByUCL1NkDnhQeVQ8BDFZL1dwUS0BYg1oXiMAa1c2AmIBZwVrBntUe1BmVXgAYwswUmIEb1UtAXNTMgdtVDgBagdgAm1TNg4hUHtUegRlWXlXcFE6AWANfl4%2FAGBXOwJ%2FAWUFawZ6VGVQbFV5AH8LNVJvBGJVMAFlUzMHYVQ1AWUHZwJyUy4OO1A3VG8EMlkzVz5ROwFiDTVeaABiVzYCaQFiBXQGZlRgUGxVZABmCzVSbQRvVS0Bc1NJBxdULQEiBycCOFN3DiNQMVQ5BDA%3D&_c=01b214b2b9f89dc8498f35bfb06ea7bb')
+                    .then((data) => {
+                        data = JSON.parse(data);
+                        if (data['request_state'] === 200) {
+                            meteo = {date: today, json: data};
+                            return {new: true, temp: data[today + ' 22:00:00'].temperature['2m'] - 273};
+                        } else return {temp: false};
+                    });
+            }
         }
     },
     {
