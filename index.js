@@ -7,6 +7,7 @@ const {User, Category, Game, Comment, Cocktail, Beer, sequelize} = require('./se
 
 
 var meteo = {date: '', json: []};
+var beer = {date: '', id: 0};
 
 const login = async function (request, reply) {
     let payload = request.payload;
@@ -108,9 +109,21 @@ module.exports = [
         path: '/beer',
         config: {auth: false},
         handler: (request) => {
-            return Beer.findOne({
-                order: [[sequelize.literal('RAND()')]],
-            })
+            let today = new Date().toISOString().substring(0, 10);
+            if (beer.date === today){
+                return Beer.findOne({
+                    where: {id: beer.id},
+                })
+            } else {
+                return Beer.findOne({
+                    order: [[sequelize.literal('RAND()')]],
+                }).then((data) => {
+                    beer = {date: today, id: data.id};
+                    return data;
+                })
+            }
+
+
         }
     },
     {
