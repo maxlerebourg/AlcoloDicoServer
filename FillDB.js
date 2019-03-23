@@ -448,7 +448,7 @@ const Party = sequelize.define('parties', {
     date: {type: Sequelize.DATE},
     visible: {type: Sequelize.BOOLEAN},
 });
-const UserParty = sequelize.define('user_party');
+const UserParty = sequelize.define('users_parties');
 
 const Category = sequelize.define('categories', {
     name: {type: Sequelize.STRING},
@@ -465,8 +465,8 @@ Cocktail.belongsTo(User);
 Beer.belongsTo(User);
 Comment.belongsTo(User);
 Party.belongsTo(User);
-Party.belongsToMany(User, {through: 'user_party'});
-User.belongsToMany(Party, {through: 'user_party'});
+Party.belongsToMany(User, {through: 'users_parties'});
+User.belongsToMany(Party, {through: 'users_parties'});
 
 /*User.sync({force: true}).then(()=>
     {
@@ -537,11 +537,11 @@ Beer.sync({force: true}).then(() => {
             }})
     }
 
-});
-UserParty.sync({force: true});*/
-Party.sync({force: true}).then(async () => {
+});*/
+UserParty.sync({force: true});
+/*Party.sync({force: true}).then(async () => {
     let party = await Party.create({date: new Date(), visible: true, userId: 1});
     let user = await User.findOne({where: {id: 1}});
     user.addParty(party);
-});
+});*/
 
