@@ -3,7 +3,7 @@ const uuid = require("uuid/v1");
 const config = require('./config');
 var requester = require("request-promise");
 
-const {User, Category, Game, Comment, Cocktail, Beer, sequelize} = require('./sequelize');
+const {User, Category, Game, Comment, Cocktail, Beer, Party, sequelize} = require('./sequelize');
 
 
 var meteo = {date: '', json: []};
@@ -110,7 +110,7 @@ module.exports = [
         config: {auth: false},
         handler: (request) => {
             let today = new Date().toISOString().substring(0, 10);
-            if (beer.date === today){
+            if (beer.date === today) {
                 return Beer.findOne({
                     where: {id: beer.id},
                 })
@@ -124,6 +124,100 @@ module.exports = [
             }
 
 
+        }
+    },
+    {
+        method: 'GET',
+        path: '/search/user/{name}',
+        config: {auth: false},
+        handler: (request) => {
+            return User.findAll({
+                limit: 10,
+                where: {
+                    $or: [
+                        {firstname: sequelize.where(sequelize.fn('LOWER', sequelize.col('firstname')), 'LIKE', '%' + request.params.name + '%')},
+                        {lastname: sequelize.where(sequelize.fn('LOWER', sequelize.col('lastname')), 'LIKE', '%' + request.params.name + '%')},
+                        {pseudo: sequelize.where(sequelize.fn('LOWER', sequelize.col('pseudo')), 'LIKE', '%' + request.params.name + '%')}
+                    ]
+                }, attributes: ['id', 'pseudo', 'firstname', 'lastname', 'admin'],
+            });
+        }
+    },
+    {
+        method: 'POST',
+        path: '/create/party',
+        config: {auth: 'jwt'},
+        handler: async (request) => {
+            let user = await User.findByPk(request.auth.credentials);
+            if (!user)
+                return reply.response({
+                    name: 'You are not log in'
+                });
+            return Party.findOrCreate({
+                where: {
+                    date: request.payload.date,
+                    userId: request.auth.credentials
+                },
+                defaults: {visible: true}
+            }).then((party) => {
+                user.addParty(party);
+                return party;
+            });
+        }
+    },
+    {
+        method: 'POST',
+        path: '/cancel/party/{id}',
+        config: {auth: 'jwt'},
+        handler: async (request) => {
+            let user = await User.findByPk(request.auth.credentials);
+            if (!user)
+                return reply.response({
+                    name: 'You are not log in'
+                });
+            return Party.findByPk(request.params.id)
+                .then((party) => {
+                    if (party.userId === request.auth.credentials) {
+                        party.update({visible: false});
+                        return reply.response({
+                            status: 'Party has canceled'
+                        });
+                    } else {
+                        return reply.response({
+                            status: 'This is not your party'
+                        });
+                    }
+                });
+        }
+    },
+    {
+        method: 'POST',
+        path: '/add/user/party/{id}',
+        config: {auth: 'jwt'},
+        handler: async (request) => {
+            let user = await User.findByPk(request.auth.credentials);
+            if (!user)
+                return reply.response({
+                    name: 'You are not log in'
+                });
+            let invited = await User.findByPk(request.param.id);
+            if (!invited)
+                return reply.response({
+                    name: 'He does not exist'
+                });
+            return Party.findByPk(request.params.id)
+                .then((party) => {
+                    if (party.userId === request.auth.credentials) {
+                        party.addUser(invited);
+                        return reply.response({
+                            status: invited.name + ' is invited'
+                        });
+                    } else {
+                        return reply.response({
+                            status: 'This is not your party'
+                        });
+                    }
+                });
         }
     },
     {
@@ -147,7 +241,7 @@ module.exports = [
             let user = await User.findByPk(request.auth.credentials);
             if (!user)
                 return reply.response({
-                    name: 'You are not log in'
+                    status: 'You are not log in'
                 });
             return Comment.findOne({
                 where: {
@@ -204,7 +298,7 @@ module.exports = [
         config: {auth: false},
         handler: async (request, reply) => {
             let today = new Date().toISOString().substring(0, 10);
-            if (meteo.date === today){
+            if (meteo.date === today) {
                 return {new: false, temp: meteo.json[today + ' 22:00:00'].temperature['2m'] - 273}
             } else {
                 return requester('https://www.infoclimat.fr/public-api/gfs/json?_ll=48.85341,2.3488&_auth=Bx1UQwF%2FByUCL1NkDnhQeVQ8BDFZL1dwUS0BYg1oXiMAa1c2AmIBZwVrBntUe1BmVXgAYwswUmIEb1UtAXNTMgdtVDgBagdgAm1TNg4hUHtUegRlWXlXcFE6AWANfl4%2FAGBXOwJ%2FAWUFawZ6VGVQbFV5AH8LNVJvBGJVMAFlUzMHYVQ1AWUHZwJyUy4OO1A3VG8EMlkzVz5ROwFiDTVeaABiVzYCaQFiBXQGZlRgUGxVZABmCzVSbQRvVS0Bc1NJBxdULQEiBycCOFN3DiNQMVQ5BDA%3D&_c=01b214b2b9f89dc8498f35bfb06ea7bb')
@@ -245,24 +339,26 @@ module.exports = [
                 .then(async (body) => {
                     let data = JSON.parse(body).data;
                     for (let i of data) {
-                        if(i.attributes.price.perUnit < 1 && i.attributes.title.indexOf('sans alcool') < 0
+                        if (i.attributes.price.perUnit < 1 && i.attributes.title.indexOf('sans alcool') < 0
                             && i.attributes.title.indexOf('cidre') < 0 && i.attributes.title.indexOf('Cidre') < 0
                             && i.attributes.title.indexOf('panaché') < 0 && i.attributes.title.indexOf('Panaché') < 0
                             && i.attributes.title.indexOf('0,0%') < 0
                         ) {
                             let product = {
                                 method: 'GET',
-                                url: 'https://www.carrefour.fr/p/'+i.attributes.slug+'-'+i.id,
+                                url: 'https://www.carrefour.fr/p/' + i.attributes.slug + '-' + i.id,
                             };
                             console.log(product.url);
                             let degree = await requester(product)
                                 .then((body) => {
                                     let match = body.match(/[1-9]?[0-9][.,]?[1-9]?% vol/);
-                                    return Number(match[0].replace(',','.')
-                                        .replace('%','')
-                                        .replace('vol','')
+                                    return Number(match[0].replace(',', '.')
+                                        .replace('%', '')
+                                        .replace('vol', '')
                                         .trim());
-                                }).catch((error) => { return error; });
+                                }).catch((error) => {
+                                    return error;
+                                });
                             if (degree)
                                 rep.push({
                                     item: i,
@@ -294,7 +390,20 @@ module.exports = [
                     'content-type': 'application/json',
                     Connection: 'keep-alive',
                 },
-                body: {"operationName":"queryProducts","variables":{"from":0,"brandName":[],"price":[],"promotions":[],"productName":"biere","categoryName":"","baseCategoryName":["Boissons"],"sort":["unit_price,asc"]},"query":"query queryProducts($filterCategory: [String], $brandName: [String], $promotions: [String], $price: [String], $sort: [String], $from: Int, $productName: String, $stores: [Int], $matter: [String], $colors: [String], $sizes: [String], $withPromotion: Boolean, $categoryName: String, $baseCategoryName: [String], $tokenSpa: String) {\n  viewer {\n    filters: productsES(category_id: $filterCategory, category_name: $categoryName, promotions: $promotions, price: $price, sort: $sort, from: $from, product_name: $productName, matter: $matter, colors: $colors, sizes: $sizes, size: 24, stores: $stores, withPromotion: $withPromotion) {\n      aggregations {\n        baseCategoriesGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        categoriesGroup {\n          buckets {\n            name\n            total\n            seo_url\n            __typename\n          }\n          __typename\n        }\n        brandsGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        priceRange {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        promotionsGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        compositionGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        colorsGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        sizesGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    productsES(category_id: $filterCategory, category_name: $categoryName, brand_name: $brandName, promotions: $promotions, price: $price, sort: $sort, from: $from, product_name: $productName, matter: $matter, colors: $colors, sizes: $sizes, size: 24, stores: $stores, withPromotion: $withPromotion, base_category_name: $baseCategoryName, tokenSpa: $tokenSpa) {\n      total\n      aggregations {\n        baseCategoriesGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        categoriesGroup {\n          buckets {\n            name\n            total\n            seo_url\n            __typename\n          }\n          __typename\n        }\n        brandsGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        priceRange {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        promotionsGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      results {\n        ...ProductFragment\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment ProductFragment on ProductESItemType {\n  product_id\n  promotions {\n    promotion_id\n    label\n    discount_price\n    cardTypes\n    beginUsable\n    endUsable\n    minimumAmount\n    discount_type\n    itemDescriptor\n    freeShippingValue\n    profil\n    __typename\n  }\n  type\n  universe\n  range\n  brand_name\n  product_name\n  category_name\n  price\n  originalPrice\n  conditioning\n  max_quantity\n  unit\n  unit_price\n  has_image\n  is_web\n  isSpa\n  landing_page_url_spa\n  add_to_cart_page_url_spa\n  image_url_spa\n  image {\n    small\n    medium\n    big\n    __typename\n  }\n  colors {\n    images {\n      medium\n      big\n      __typename\n    }\n    __typename\n  }\n  ean\n  __typename\n}\n"}
+                body: {
+                    "operationName": "queryProducts",
+                    "variables": {
+                        "from": 0,
+                        "brandName": [],
+                        "price": [],
+                        "promotions": [],
+                        "productName": "biere",
+                        "categoryName": "",
+                        "baseCategoryName": ["Boissons"],
+                        "sort": ["unit_price,asc"]
+                    },
+                    "query": "query queryProducts($filterCategory: [String], $brandName: [String], $promotions: [String], $price: [String], $sort: [String], $from: Int, $productName: String, $stores: [Int], $matter: [String], $colors: [String], $sizes: [String], $withPromotion: Boolean, $categoryName: String, $baseCategoryName: [String], $tokenSpa: String) {\n  viewer {\n    filters: productsES(category_id: $filterCategory, category_name: $categoryName, promotions: $promotions, price: $price, sort: $sort, from: $from, product_name: $productName, matter: $matter, colors: $colors, sizes: $sizes, size: 24, stores: $stores, withPromotion: $withPromotion) {\n      aggregations {\n        baseCategoriesGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        categoriesGroup {\n          buckets {\n            name\n            total\n            seo_url\n            __typename\n          }\n          __typename\n        }\n        brandsGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        priceRange {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        promotionsGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        compositionGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        colorsGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        sizesGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    productsES(category_id: $filterCategory, category_name: $categoryName, brand_name: $brandName, promotions: $promotions, price: $price, sort: $sort, from: $from, product_name: $productName, matter: $matter, colors: $colors, sizes: $sizes, size: 24, stores: $stores, withPromotion: $withPromotion, base_category_name: $baseCategoryName, tokenSpa: $tokenSpa) {\n      total\n      aggregations {\n        baseCategoriesGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        categoriesGroup {\n          buckets {\n            name\n            total\n            seo_url\n            __typename\n          }\n          __typename\n        }\n        brandsGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        priceRange {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        promotionsGroup {\n          buckets {\n            name\n            total\n            __typename\n          }\n          __typename\n        }\n        __typename\n      }\n      results {\n        ...ProductFragment\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment ProductFragment on ProductESItemType {\n  product_id\n  promotions {\n    promotion_id\n    label\n    discount_price\n    cardTypes\n    beginUsable\n    endUsable\n    minimumAmount\n    discount_type\n    itemDescriptor\n    freeShippingValue\n    profil\n    __typename\n  }\n  type\n  universe\n  range\n  brand_name\n  product_name\n  category_name\n  price\n  originalPrice\n  conditioning\n  max_quantity\n  unit\n  unit_price\n  has_image\n  is_web\n  isSpa\n  landing_page_url_spa\n  add_to_cart_page_url_spa\n  image_url_spa\n  image {\n    small\n    medium\n    big\n    __typename\n  }\n  colors {\n    images {\n      medium\n      big\n      __typename\n    }\n    __typename\n  }\n  ean\n  __typename\n}\n"
+                }
                 , json: true
             };
             await requester(monop)
@@ -302,7 +411,7 @@ module.exports = [
                     console.log('succes');
                     for (let i of body.data.viewer.productsES.results) {
                         //console.log(i);
-                        if(i.product_name.search(/[1-9]?[0-9][.,]?[1-9]?/) > 0) {
+                        if (i.product_name.search(/[1-9]?[0-9][.,]?[1-9]?/) > 0) {
                             let match = i.product_name.match(/[1-9]?[0-9][.,]?[1-9]?/);
                             rep.push({
                                 item: i,
@@ -311,12 +420,12 @@ module.exports = [
                                 price: i.price,
                                 title: i.product_name,
                                 brand: i.brand_name,
-                                degree: Number(match[0].replace(',','.')),
-                                rendement: Number(match[0].replace(',','.')) / Number(i.unit_price),
+                                degree: Number(match[0].replace(',', '.')),
+                                rendement: Number(match[0].replace(',', '.')) / Number(i.unit_price),
                             });
                         }
                     }
-                }).catch(()=>{
+                }).catch(() => {
                     return reply.response({
                         status: 'error'
                     })

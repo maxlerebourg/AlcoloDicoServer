@@ -36,6 +36,12 @@ const User = sequelize.define('users', {
     password: {type: Sequelize.STRING},
     admin: {type: Sequelize.BOOLEAN},
 });
+const Party = sequelize.define('parties', {
+    date: {type: Sequelize.DATE},
+    visible: {type: Sequelize.BOOLEAN},
+});
+const UserParty = sequelize.define('users_parties');
+
 const Category = sequelize.define('categories', {
     name: {type: Sequelize.STRING},
 });
@@ -44,11 +50,14 @@ const Comment = sequelize.define('comments', {
     review: {type: Sequelize.TEXT},
 });
 
+
 Game.belongsTo(Category);
 Game.belongsTo(User);
 Cocktail.belongsTo(User);
 Beer.belongsTo(User);
 Comment.belongsTo(User);
-Game.hasMany(Comment, {as: 'coms'});
+Party.belongsTo(User);
+Party.belongsToMany(User, {through: 'users_parties'});
+User.belongsToMany(Party, {through: 'users_parties'});
 
-module.exports = {User, Category, Game, Comment, Cocktail, Beer,  sequelize};
+module.exports = {User, Category, Game, Comment, Cocktail, Beer, Party, sequelize};

@@ -404,7 +404,7 @@ const beer = [{
     price: 1.69,
     image: "https://s2.qwant.com/thumbr/0x380/5/a/44654806ea6fd14c57382ac8ec598c1fd3b45f923b55ae86ed439996388652/3697393_900.jpg?u=https%3A%2F%2Fimg.coopathome.ch%2Fprodukte%2F880_880%2FRGB%2F3697393_900.jpg%3F_%3D1510228626827&q=0&b=1&p=0&a=1",
     alcool: 11.6,
-    brand : "Amsterdam",
+    brand: "Amsterdam",
     userId: 1
 }];
 
@@ -443,6 +443,12 @@ const User = sequelize.define('users', {
     password: {type: Sequelize.STRING},
     admin: {type: Sequelize.BOOLEAN},
 });
+const Party = sequelize.define('parties', {
+    date: {type: Sequelize.DATE},
+    visible: {type: Sequelize.BOOLEAN},
+});
+const UserParty = sequelize.define('user_party');
+
 const Category = sequelize.define('categories', {
     name: {type: Sequelize.STRING},
 });
@@ -451,12 +457,15 @@ const Comment = sequelize.define('comments', {
     review: {type: Sequelize.TEXT},
 });
 
+
 Game.belongsTo(Category);
 Game.belongsTo(User);
 Cocktail.belongsTo(User);
 Beer.belongsTo(User);
 Comment.belongsTo(User);
-Game.hasMany(Comment, {as: 'coms'});
+Party.belongsTo(User);
+Party.belongsToMany(User, {through: 'user_party'});
+User.belongsToMany(Party, {through: 'user_party'});
 
 /*User.sync({force: true}).then(()=>
     {
@@ -511,7 +520,7 @@ Cocktail.sync({force: true}).then(() => {
             }
         })
     }
-});*/
+});
 Beer.sync({force: true}).then(() => {
     for (let i of beer){
         Beer.findOrCreate({
@@ -528,3 +537,10 @@ Beer.sync({force: true}).then(() => {
     }
 
 });
+UserParty.sync({force: true});*/
+Party.sync({force: true}).then(async () => {
+    let party = await Party.create({date: new Date(), visible: true, userId: 1});
+    let user = await User.findOne({where: {id: 1}});
+    user.addParty(party);
+});
+
