@@ -149,6 +149,7 @@ module.exports = [
         config: {auth: 'jwt'},
         handler: async (request) => {
             let user = await User.findByPk(request.auth.credentials);
+            console.log(request.payload);
             if (!user)
                 return reply.response({
                     name: 'You are not log in'
@@ -160,7 +161,7 @@ module.exports = [
                 },
                 defaults: {visible: true}
             }).then((party) => {
-                user.addParty(party);
+                party.addUser(user);
                 return party;
             });
         }
