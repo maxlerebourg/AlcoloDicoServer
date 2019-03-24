@@ -152,7 +152,7 @@ module.exports = [
             if (!user)
                 return reply.response({status: 'You are not log in'});
             return user.getParty({
-                where: {visible: true, date: {$gte: new Date()}},
+                where: {visible: true},
                 include: [{model: User,
                     attributes: {exclude: ['password', 'mail']}
                 }],
