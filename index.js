@@ -139,7 +139,7 @@ module.exports = [
                         {lastname: sequelize.where(sequelize.fn('LOWER', sequelize.col('lastname')), 'LIKE', '%' + request.params.name + '%')},
                         {pseudo: sequelize.where(sequelize.fn('LOWER', sequelize.col('pseudo')), 'LIKE', '%' + request.params.name + '%')}
                     ]
-                }, attributes: ['id', 'pseudo', 'firstname', 'lastname', 'admin'],
+                }, attributes: ['id', 'pseudo', 'firstname'],
             });
         }
     },
@@ -152,7 +152,7 @@ module.exports = [
             if (!user)
                 return reply.response({status: 'You are not log in'});
             return user.getParty({
-                where: {visible: true},
+                where: {visible: true, date: {$gte: new Date()}},
                 include: [{model: User,
                     attributes: {exclude: ['password', 'mail']}
                 }],
