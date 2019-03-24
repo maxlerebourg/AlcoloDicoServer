@@ -57,7 +57,8 @@ Cocktail.belongsTo(User);
 Beer.belongsTo(User);
 Comment.belongsTo(User);
 Party.belongsTo(User);
-Party.belongsToMany(User, {through: 'users_parties'});
-User.belongsToMany(Party, {through: 'users_parties'});
+User.belongsToMany(Party, {as: 'Party',through: UserParty});
+Party.belongsToMany(User, {as: 'Guests',through: UserParty});
 
-module.exports = {User, Category, Game, Comment, Cocktail, Beer, Party, sequelize};
+
+module.exports = {User, Category, Game, Comment, Cocktail, Beer, Party, UserParty, sequelize};

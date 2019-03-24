@@ -3,7 +3,7 @@ const uuid = require("uuid/v1");
 const config = require('./config');
 var requester = require("request-promise");
 
-const {User, Category, Game, Comment, Cocktail, Beer, Party, sequelize} = require('./sequelize');
+const {User, Category, Game, Comment, Cocktail, Beer, Party, UserParty, sequelize} = require('./sequelize');
 
 
 var meteo = {date: '', json: []};
@@ -144,33 +144,51 @@ module.exports = [
         }
     },
     {
+        method: 'GET',
+        path: '/party',
+        config: {auth: 'jwt'},
+        handler: async (request) => {
+            let user = await User.findByPk(request.auth.credentials);
+            if (!user)
+                return reply.response({
+                    name: 'You are not log in'
+                });
+            return user.getParty({
+                where: {visible: true},
+                include: [{model: User,
+                    attributes: {exclude: ['password', 'mail', 'firstname']}
+                }],
+
+        })
+        }
+    },
+    {
         method: 'POST',
         path: '/create/party',
         config: {auth: 'jwt'},
         handler: async (request) => {
             let user = await User.findByPk(request.auth.credentials);
-            console.log(request.payload);
             if (!user)
                 return reply.response({
                     name: 'You are not log in'
                 });
             return Party.findOrCreate({
                 where: {
-                    date: request.payload.date,
+                    date: new Date(request.payload.date),
                     userId: request.auth.credentials
                 },
                 defaults: {visible: true}
             }).then((party) => {
-                party.addUser(user);
+                UserParty.findOrCreate({where: {partyId: party[0].id, userId: user.id}});
                 return party;
             });
         }
     },
     {
-        method: 'POST',
+        method: 'GET',
         path: '/cancel/party/{id}',
         config: {auth: 'jwt'},
-        handler: async (request) => {
+        handler: async (request, reply) => {
             let user = await User.findByPk(request.auth.credentials);
             if (!user)
                 return reply.response({
@@ -178,15 +196,12 @@ module.exports = [
                 });
             return Party.findByPk(request.params.id)
                 .then((party) => {
-                    if (party.userId === request.auth.credentials) {
-                        party.update({visible: false});
-                        return reply.response({
-                            status: 'Party has canceled'
-                        });
+                    if (party.visible === false) {
+                        return reply.response({status: 'This party is already canceled'});
+                    } else if (party.userId === Number(request.auth.credentials)) {
+                        return party.update({visible: false});
                     } else {
-                        return reply.response({
-                            status: 'This is not your party'
-                        });
+                        return reply.response({status: 'This is not your party'});
                     }
                 });
         }
@@ -195,23 +210,23 @@ module.exports = [
         method: 'POST',
         path: '/add/user/party/{id}',
         config: {auth: 'jwt'},
-        handler: async (request) => {
+        handler: async (request, reply) => {
             let user = await User.findByPk(request.auth.credentials);
             if (!user)
                 return reply.response({
                     name: 'You are not log in'
                 });
-            let invited = await User.findByPk(request.param.id);
+            let invited = await User.findByPk(request.payload.id);
             if (!invited)
                 return reply.response({
                     name: 'He does not exist'
                 });
             return Party.findByPk(request.params.id)
                 .then((party) => {
-                    if (party.userId === request.auth.credentials) {
-                        party.addUser(invited);
+                    if (party.userId === Number(request.auth.credentials)) {
+                        UserParty.findOrCreate({where: {partyId: party.id, userId: invited.id}});
                         return reply.response({
-                            status: invited.name + ' is invited'
+                            status: invited.pseudo + ' is invited'
                         });
                     } else {
                         return reply.response({
