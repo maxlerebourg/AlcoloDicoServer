@@ -150,16 +150,30 @@ module.exports = [
         handler: async (request) => {
             let user = await User.findByPk(request.auth.credentials);
             if (!user)
-                return reply.response({
-                    name: 'You are not log in'
-                });
+                return reply.response({status: 'You are not log in'});
             return user.getParty({
                 where: {visible: true},
                 include: [{model: User,
-                    attributes: {exclude: ['password', 'mail', 'firstname']}
+                    attributes: {exclude: ['password', 'mail']}
                 }],
 
-        })
+            })
+        }
+    },
+    {
+        method: 'GET',
+        path: '/party/{id}',
+        config: {auth: 'jwt'},
+        handler: async (request) => {
+            let user = await User.findByPk(request.auth.credentials);
+            if (!user)
+                return reply.response({status: 'You are not log in'});
+            let party = await Party.findByPk(request.params.id);
+            if (!party)
+                return reply.response({status: 'This party does not exist'});
+            return party.getGuests({
+                    attributes: {exclude: ['password', 'mail']}
+            })
         }
     },
     {
