@@ -446,6 +446,7 @@ const User = sequelize.define('users', {
 });
 const Party = sequelize.define('parties', {
     date: {type: Sequelize.DATE},
+    note: {type: Sequelize.TEXT},
     visible: {type: Sequelize.BOOLEAN},
 });
 const UserParty = sequelize.define('users_parties');
@@ -538,10 +539,6 @@ Beer.sync({force: true}).then(() => {
     }
 
 });*/
-UserParty.sync({force: true});
-/*Party.sync({force: true}).then(async () => {
-    let party = await Party.create({date: new Date(), visible: true, userId: 1});
-    let user = await User.findOne({where: {id: 1}});
-    user.addParty(party);
-});*/
+//UserParty.sync({force: true});
+Party.sync({force: true});
 

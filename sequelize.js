@@ -38,6 +38,7 @@ const User = sequelize.define('users', {
 });
 const Party = sequelize.define('parties', {
     date: {type: Sequelize.DATE},
+    note: {type: Sequelize.TEXT},
     visible: {type: Sequelize.BOOLEAN},
 });
 const UserParty = sequelize.define('users_parties');

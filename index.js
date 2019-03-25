@@ -251,6 +251,36 @@ module.exports = [
         }
     },
     {
+        method: 'POST',
+        path: '/remove/user/party/{id}',
+        config: {auth: 'jwt'},
+        handler: async (request, reply) => {
+            let user = await User.findByPk(request.auth.credentials);
+            if (!user)
+                return reply.response({
+                    name: 'You are not log in'
+                });
+            let invited = await User.findByPk(request.payload.id);
+            if (!invited)
+                return reply.response({
+                    name: 'He does not exist'
+                });
+            return Party.findByPk(request.params.id)
+                .then((party) => {
+                    if (party.userId === Number(request.auth.credentials)) {
+                        UserParty.destroy({where: {partyId: party.id, userId: invited.id}});
+                        return reply.response({
+                            status: invited.pseudo + ' is not invited anymore'
+                        });
+                    } else {
+                        return reply.response({
+                            status: 'This is not your party'
+                        });
+                    }
+                });
+        }
+    },
+    {
         method: 'GET',
         path: '/comments/game/{id}',
         config: {auth: false},
