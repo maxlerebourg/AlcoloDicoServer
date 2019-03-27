@@ -208,6 +208,7 @@ module.exports = [
                 return reply.response({
                     name: 'You are not log in'
                 });
+            console.log(request.params.id);
             return Party.findByPk(request.params.id)
                 .then((party) => {
                     if (party.visible === false) {
@@ -217,6 +218,8 @@ module.exports = [
                     } else {
                         return reply.response({status: 'This is not your party'});
                     }
+                }).catch(() => {
+                    return reply.response({status: 'WTF'});
                 });
         }
     },
