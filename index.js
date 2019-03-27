@@ -189,7 +189,8 @@ module.exports = [
             return Party.findOrCreate({
                 where: {
                     date: new Date(request.payload.date),
-                    userId: request.auth.credentials
+                    userId: request.auth.credentials,
+                    visible: true
                 },
                 defaults: {visible: true}
             }).then((party) => {
