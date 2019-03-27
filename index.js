@@ -233,7 +233,7 @@ module.exports = [
             return user.getParties().then(async (parties) => {
                     let party = await parties.find((i) => {return i.id === Number(request.params.id)});
                     return party.update({note: (party.note ? party.note + (party.note.length < 1000 ?
-                            request.payload.note + '\n' : '') : request.payload.note)});
+                            request.payload.note + '\n' : '') : request.payload.note + '\n')});
                 }
             ).catch(() => {
                 return reply.response({status: 'You are not in this party'});
