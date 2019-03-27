@@ -1,6 +1,7 @@
 const config = require('./config');
 
 const Sequelize = require('sequelize');
+
 const sequelize = new Sequelize('mysql://root:' + config.mdp + '@127.0.0.1:3306/' + config.db);
 sequelize.authenticate();
 
@@ -58,7 +59,7 @@ Cocktail.belongsTo(User);
 Beer.belongsTo(User);
 Comment.belongsTo(User);
 Party.belongsTo(User);
-User.belongsToMany(Party, {as: 'Party',through: UserParty});
+User.belongsToMany(Party, {as: 'Parties',through: UserParty});
 Party.belongsToMany(User, {as: 'Guests',through: UserParty});
 
 

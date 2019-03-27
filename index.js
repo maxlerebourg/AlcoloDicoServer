@@ -151,7 +151,7 @@ module.exports = [
             let user = await User.findByPk(request.auth.credentials);
             if (!user)
                 return reply.response({status: 'You are not log in'});
-            return user.getParty({
+            return user.getParties({
                 where: {visible: true},
                 include: [{model: User,
                     attributes: {exclude: ['password', 'mail']}
@@ -218,6 +218,26 @@ module.exports = [
                         return reply.response({status: 'This is not your party'});
                     }
                 });
+        }
+    },
+    {
+        method: 'POST',
+        path: '/note/party/{id}',
+        config: {auth: 'jwt'},
+        handler: async (request, reply) => {
+            let user = await User.findByPk(request.auth.credentials);
+            if (!user)
+                return reply.response({
+                    name: 'You are not log in'
+                });
+            return user.getParties().then(async (parties) => {
+                    let party = await parties.find((i) => {return i.id === Number(request.params.id)});
+                    return party.update({note: (party.note ? party.note + (party.note.length < 1000 ?
+                            request.payload.note + '\n' : '') : request.payload.note)});
+                }
+            ).catch(() => {
+                return reply.response({status: 'You are not in this party'});
+            });
         }
     },
     {
