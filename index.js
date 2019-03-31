@@ -327,7 +327,6 @@ module.exports = [
                 return reply.response({
                     status: 'You are not log in'
                 });
-            console.log(Number(request.params.id) + ' ' + Number(request.auth.credentials));
             return Comment.findOne({
                 where: {
                     gameId: Number(request.params.id),
@@ -338,14 +337,14 @@ module.exports = [
                     return comment.update({
                         review: request.payload.review,
                         rate: Number(request.payload.rate),
+                        updatedAt: new Date(),
                     });
                 } else { // insert
                     return Comment.create({
-                        gameId: Number(request.params.id),
-                        userId: Number(request.auth.credentials),
                         review: request.payload.review,
                         rate: Number(request.payload.rate),
-                        updatedAt: new Date(),
+                        gameId: Number(request.params.id),
+                        userId: Number(request.auth.credentials),
                     });
                 }
             })
