@@ -327,6 +327,7 @@ module.exports = [
                 return reply.response({
                     status: 'You are not log in'
                 });
+            console.log(Number(request.params.id) + ' ' + Number(request.auth.credentials));
             return Comment.findOne({
                 where: {
                     gameId: Number(request.params.id),
@@ -383,7 +384,7 @@ module.exports = [
         handler: async (request, reply) => {
             let today = new Date().toISOString().substring(0, 10);
             if (meteo.date === today) {
-                return {new: false, temp: meteo.json[today + ' 22:00:00'].temperature['2m'] - 273}
+                return {new: false, temp: meteo.json[today + ' 20:00:00'].temperature['2m'] - 273}
             } else {
                 return requester('https://www.infoclimat.fr/public-api/gfs/json?_ll=48.85341,2.3488&_auth=Bx1UQwF%2FByUCL1NkDnhQeVQ8BDFZL1dwUS0BYg1oXiMAa1c2AmIBZwVrBntUe1BmVXgAYwswUmIEb1UtAXNTMgdtVDgBagdgAm1TNg4hUHtUegRlWXlXcFE6AWANfl4%2FAGBXOwJ%2FAWUFawZ6VGVQbFV5AH8LNVJvBGJVMAFlUzMHYVQ1AWUHZwJyUy4OO1A3VG8EMlkzVz5ROwFiDTVeaABiVzYCaQFiBXQGZlRgUGxVZABmCzVSbQRvVS0Bc1NJBxdULQEiBycCOFN3DiNQMVQ5BDA%3D&_c=01b214b2b9f89dc8498f35bfb06ea7bb')
                     .then((data) => {

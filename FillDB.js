@@ -420,6 +420,16 @@ const Game = sequelize.define('games', {
     images: {type: Sequelize.TEXT},
     visible: {type: Sequelize.BOOLEAN},
 });
+const Category = sequelize.define('categories', {
+    name: {type: Sequelize.STRING},
+});
+const AltRule = sequelize.define('altrules', {
+    rules: {type: Sequelize.TEXT},
+});
+const Comment = sequelize.define('comments', {
+    rate: {type: Sequelize.INTEGER},
+    review: {type: Sequelize.TEXT},
+});
 const Cocktail = sequelize.define('cocktails', {
     name: {type: Sequelize.STRING},
     preview: {type: Sequelize.TEXT},
@@ -450,14 +460,6 @@ const Party = sequelize.define('parties', {
     visible: {type: Sequelize.BOOLEAN},
 });
 const UserParty = sequelize.define('users_parties');
-
-const Category = sequelize.define('categories', {
-    name: {type: Sequelize.STRING},
-});
-const Comment = sequelize.define('comments', {
-    rate: {type: Sequelize.INTEGER},
-    review: {type: Sequelize.TEXT},
-});
 
 
 Game.belongsTo(Category);
