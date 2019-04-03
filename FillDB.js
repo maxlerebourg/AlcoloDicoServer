@@ -454,6 +454,15 @@ const User = sequelize.define('users', {
     password: {type: Sequelize.STRING},
     admin: {type: Sequelize.BOOLEAN},
 });
+const User2 = sequelize.define('users2', {
+    pseudo: {type: Sequelize.STRING},
+    firstname: {type: Sequelize.STRING},
+    lastname: {type: Sequelize.STRING},
+    mail: {type: Sequelize.STRING},
+    password: {type: Sequelize.STRING},
+    admin: {type: Sequelize.BOOLEAN},
+    notification_id: {type: Sequelize.STRING},
+});
 const Party = sequelize.define('parties', {
     date: {type: Sequelize.DATE},
     note: {type: Sequelize.TEXT},
@@ -471,7 +480,7 @@ Party.belongsTo(User);
 Party.belongsToMany(User, {through: 'users_parties'});
 User.belongsToMany(Party, {through: 'users_parties'});
 
-/*User.sync({force: true}).then(()=>
+User.sync({force: true}).then(()=>
     {
         User.findOrCreate({
             where: {pseudo: 'admin', admin: true, id: 1},
@@ -479,6 +488,7 @@ User.belongsToMany(Party, {through: 'users_parties'});
         })
     }
 );
+/*
 Category.sync({force: true}).then(
     () => {
         for (var jeu of ['Cartes', 'Caps','Hess','Balles']) {
@@ -488,6 +498,7 @@ Category.sync({force: true}).then(
         }
     }
 );
+
 Game.sync({force: true}).then(() => {
     for (var i of list) {
         Game.findOrCreate({

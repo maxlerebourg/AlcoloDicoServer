@@ -19,7 +19,7 @@ const login = async function (request, reply) {
                 //jwtid: uuid(),
                 //issuer: 'AlcoloDico',
             });
-
+        user.update({notification_id: payload.notification_id});
         return reply.response({
             pseudo: user.pseudo,
             tokenType: 'JWT',
@@ -58,6 +58,7 @@ module.exports = [
                 lastname: payload.lastname,
                 pseudo: payload.pseudo,
                 admin: false,
+                notification_id: payload.notification_id,
             });
             return login(request, reply)
         }

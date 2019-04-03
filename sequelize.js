@@ -36,6 +36,7 @@ const User = sequelize.define('users', {
     mail: {type: Sequelize.STRING},
     password: {type: Sequelize.STRING},
     admin: {type: Sequelize.BOOLEAN},
+    notification_id: {type: Sequelize.STRING},
 });
 const Party = sequelize.define('parties', {
     date: {type: Sequelize.DATE},
