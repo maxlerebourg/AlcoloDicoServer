@@ -153,7 +153,7 @@ module.exports = [
                         {lastname: sequelize.where(sequelize.fn('LOWER', sequelize.col('lastname')), 'LIKE', '%' + request.params.name + '%')},
                         {pseudo: sequelize.where(sequelize.fn('LOWER', sequelize.col('pseudo')), 'LIKE', '%' + request.params.name + '%')}
                     ]
-                }, attributes: ['id', 'pseudo', 'firstname'],
+                }, attributes: ['id', 'pseudo', 'firstname', 'notification_id'],
             });
         }
     },
@@ -186,7 +186,7 @@ module.exports = [
             if (!party)
                 return reply.response({status: 'This party does not exist'});
             return party.getGuests({
-                    attributes: {exclude: ['password', 'mail']}
+                attributes: ['id', 'pseudo', 'firstname', 'notification_id'],
             })
         }
     },
