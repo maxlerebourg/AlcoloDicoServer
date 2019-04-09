@@ -19,8 +19,8 @@ const login = async function (request, reply) {
                 //jwtid: uuid(),
                 //issuer: 'AlcoloDico',
             });
-        user.update({notification_id: payload.notification_id});
         return reply.response({
+            id: user.id,
             pseudo: user.pseudo,
             tokenType: 'JWT',
             token: 'Bearer ' + jwtToken,
@@ -58,9 +58,22 @@ module.exports = [
                 lastname: payload.lastname,
                 pseudo: payload.pseudo,
                 admin: false,
-                notification_id: payload.notification_id,
             });
             return login(request, reply)
+        }
+    },
+    {
+        method: 'GET',
+        path: '/notification_id/{token}',
+        config: {auth: 'jwt'},
+        handler: async (request, reply) => {
+            let user = await User.findByPk(request.auth.credentials);
+            if (!user)
+                return reply.response({status: 'You are not log in'});
+            return user.update({notification_id: request.params.token})
+                .then(() => {return reply.response({status: 'ok'});})
+                .catch(() => {return reply.response({name: 'failure'});
+            })
         }
     },
     {
@@ -148,7 +161,7 @@ module.exports = [
         method: 'GET',
         path: '/party',
         config: {auth: 'jwt'},
-        handler: async (request) => {
+        handler: async (request, reply) => {
             let user = await User.findByPk(request.auth.credentials);
             if (!user)
                 return reply.response({status: 'You are not log in'});
@@ -165,7 +178,7 @@ module.exports = [
         method: 'GET',
         path: '/party/{id}',
         config: {auth: 'jwt'},
-        handler: async (request) => {
+        handler: async (request, reply) => {
             let user = await User.findByPk(request.auth.credentials);
             if (!user)
                 return reply.response({status: 'You are not log in'});
@@ -181,7 +194,7 @@ module.exports = [
         method: 'POST',
         path: '/create/party',
         config: {auth: 'jwt'},
-        handler: async (request) => {
+        handler: async (request, reply) => {
             let user = await User.findByPk(request.auth.credentials);
             if (!user)
                 return reply.response({
@@ -210,7 +223,6 @@ module.exports = [
                 return reply.response({
                     name: 'You are not log in'
                 });
-            console.log(request.params.id);
             return Party.findByPk(request.params.id)
                 .then((party) => {
                     if (party.visible === false) {
@@ -391,7 +403,7 @@ module.exports = [
                         data = JSON.parse(data);
                         if (data['request_state'] === 200) {
                             meteo = {date: today, json: data};
-                            return {new: true, temp: data[today + ' 22:00:00'].temperature['2m'] - 273};
+                            return {new: true, temp: data[today + ' 20:00:00'].temperature['2m'] - 273};
                         } else return {temp: false};
                     });
             }
