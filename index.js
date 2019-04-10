@@ -72,7 +72,7 @@ module.exports = [
                 return reply.response({status: 'You are not log in'});
             return user.update({notification_id: request.params.token})
                 .then(() => {return reply.response({status: 'ok'});})
-                .catch(() => {return reply.response({name: 'failure'});
+                .catch(() => {return reply.response({status: 'failure'});
             })
         }
     },
@@ -167,6 +167,26 @@ module.exports = [
                 return reply.response({status: 'You are not log in'});
             return user.getParties({
                 where: {visible: true},
+                include: [{model: User,
+                    attributes: {exclude: ['password', 'mail']}
+                }],
+
+            })
+        }
+    },
+    {
+        method: 'GET',
+        path: '/party/month/{month}',
+        config: {auth: 'jwt'},
+        handler: async (request, reply) => {
+            let user = await User.findByPk(request.auth.credentials);
+            if (!user)
+                return reply.response({status: 'You are not log in'});
+            let date = new Date(request.params.month);
+            let startMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+            let endMonth = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+            return user.getParties({
+                where: {visible: true, $and : [{date : {$gte: startMonth}},{date :  {$lt: endMonth}}]},
                 include: [{model: User,
                     attributes: {exclude: ['password', 'mail']}
                 }],
