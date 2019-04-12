@@ -304,8 +304,7 @@ module.exports = [
                                             title: 'Invitation',
                                             body: user.pseudo + ' vous a invité à sa soirée du ' + party.date,
                                         },
-                                        to: 'd62blZk2q1k:APA91bFV3_P-A9myWcw6J5Wj5BpFL8k5L3l1iHj7ZsMJXOSLqgi9LBNDLaaeF9Z88l6lw3Rb47gjkI7fIJdJN1TJpGdrUedIv32Ry6Si_sqpBBME0WLvDR3rvEFbmFAr4BvJK9Qp-0qz'
-                                        //invited.notification_id
+                                        to: invited.notification_id
                                     };
                                     let fcm_send = {
                                         method: 'POST',
