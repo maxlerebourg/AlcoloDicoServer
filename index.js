@@ -302,7 +302,8 @@ module.exports = [
                                     let message = {
                                         notification: {
                                             title: 'Invitation',
-                                            body: user.pseudo + ' vous a invité à sa soirée du ' + party.date,
+                                            body: user.pseudo + ' vous a invité à sa soirée du ' +
+                                                party.date.toLocaleString('fr'),
                                         },
                                         to: invited.notification_id
                                     };
