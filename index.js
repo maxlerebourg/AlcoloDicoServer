@@ -1,7 +1,8 @@
 const Jwt = require('jsonwebtoken');
 const uuid = require("uuid/v1");
 const config = require('./config');
-var requester = require("request-promise");
+const requester = require("request-promise");
+
 
 const {User, Category, Game, Comment, Cocktail, Beer, Party, UserParty, sequelize} = require('./sequelize');
 
@@ -295,10 +296,35 @@ module.exports = [
             return Party.findByPk(request.params.id)
                 .then((party) => {
                     if (party.userId === Number(request.auth.credentials)) {
-                        UserParty.findOrCreate({where: {partyId: party.id, userId: invited.id}});
-                        return reply.response({
-                            status: invited.pseudo + ' is invited'
-                        });
+                        return UserParty.findOrCreate({where: {partyId: party.id, userId: invited.id}})
+                            .then(() => {
+                                if (invited.notification_id){
+                                    let message = {
+                                        notification: {
+                                            title: 'Invitation',
+                                            body: user.pseudo + ' vous a invité à sa soirée du ' + party.date,
+                                        },
+                                        to: 'd62blZk2q1k:APA91bFV3_P-A9myWcw6J5Wj5BpFL8k5L3l1iHj7ZsMJXOSLqgi9LBNDLaaeF9Z88l6lw3Rb47gjkI7fIJdJN1TJpGdrUedIv32Ry6Si_sqpBBME0WLvDR3rvEFbmFAr4BvJK9Qp-0qz'
+                                        //invited.notification_id
+                                    };
+                                    let fcm_send = {
+                                        method: 'POST',
+                                        url: 'https://fcm.googleapis.com/fcm/send',
+                                        headers: {
+                                            'Content-Type':'application/json',
+                                            Authorization: 'key='+config.fcm_notif,
+                                        },
+                                        body: JSON.stringify(message)
+                                    };
+                                    console.log(fcm_send);
+                                    requester(fcm_send);
+                                }
+                                return reply.response({
+                                    status: invited.pseudo + ' is invited'
+                                })
+                            }
+                        );
+
                     } else {
                         return reply.response({
                             status: 'This is not your party'
