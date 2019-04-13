@@ -294,16 +294,16 @@ module.exports = [
                     name: 'He does not exist'
                 });
             return Party.findByPk(request.params.id)
-                .then((party) => {
-                    if (party.userId === Number(request.auth.credentials)) {
-                        return UserParty.findOrCreate({where: {partyId: party.id, userId: invited.id}})
-                            .then(() => {
+                .then(async (party) => {
+                    let bool = await party.hasGuest(invited);
+                    if (party.userId === Number(request.auth.credentials && !bool)) {
+                        return party.addGuest(invited).then(() => {
                                 if (invited.notification_id){
                                     let message = {
                                         notification: {
                                             title: 'Invitation',
                                             body: user.pseudo + ' vous a invité à sa soirée du ' +
-                                                party.date.toLocaleString('fr'),
+                                                party.date.getDate()+'/'+party.date.getMonth()+'/'+party.date.getFullYear(),
                                         },
                                         to: invited.notification_id
                                     };
@@ -327,7 +327,7 @@ module.exports = [
 
                     } else {
                         return reply.response({
-                            status: 'This is not your party'
+                            status: 'This is not your party or guest is already in your team party.'
                         });
                     }
                 });
