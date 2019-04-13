@@ -154,7 +154,7 @@ module.exports = [
                         {lastname: sequelize.where(sequelize.fn('LOWER', sequelize.col('lastname')), 'LIKE', '%' + request.params.name + '%')},
                         {pseudo: sequelize.where(sequelize.fn('LOWER', sequelize.col('pseudo')), 'LIKE', '%' + request.params.name + '%')}
                     ]
-                }, attributes: ['id', 'pseudo', 'firstname', 'notification_id'],
+                }, attributes: ['id', 'pseudo', 'firstname'],
             });
         }
     },
@@ -205,9 +205,12 @@ module.exports = [
                 return reply.response({status: 'You are not log in'});
             let party = await Party.findByPk(request.params.id);
             if (!party)
-                return reply.response({status: 'This party does not exist'});
+                return reply.response({status: 'This party does not exist.'});
+            let ok = await Party.findByPk(request.params.id);
+            if (!ok)
+                return reply.response({status: 'You are not in the party team.'});
             return party.getGuests({
-                attributes: ['id', 'pseudo', 'firstname', 'notification_id'],
+                attributes: ['id', 'pseudo', 'firstname'],
             })
         }
     },
