@@ -94,8 +94,9 @@ module.exports = [
         path: '/list/game/new',
         config: {auth: false},
         handler: (request) => {
+            let date = new Date().getTime() - 86400000 * 7;
             return Game.findAll({
-                where: {visible: false},
+                where: {$or: [{visible: false}, {updatedAt: {$gte:date}}]},
                 order: [['createdAt', 'DESC']],
             })
         }
@@ -105,6 +106,14 @@ module.exports = [
         path: '/list/game',
         config: {auth: false},
         handler: (request) => {
+            /*return Comment.findAll({
+                attributes: [
+                    [Comment.sequelize.fn('AVG', Comment.sequelize.col('rate')), 'rate'],
+                    [Comment.sequelize.fn('COUNT', Comment.sequelize.col('rate')), 'comments']
+                ],
+                include: [{model: Game}],
+                group: 'gameId',
+            })*/
             return sequelize.query('SELECT g.*, avg(c.rate) as rate FROM `games` as g LEFT JOIN `comments` AS c ON g.id = c.gameId where g.visible group by g.id order by g.name');
         }
     },
@@ -151,10 +160,10 @@ module.exports = [
                 where: {
                     $or: [
                         {firstname: sequelize.where(sequelize.fn('LOWER', sequelize.col('firstname')), 'LIKE', '%' + request.params.name + '%')},
-                        {lastname: sequelize.where(sequelize.fn('LOWER', sequelize.col('lastname')), 'LIKE', '%' + request.params.name + '%')},
                         {pseudo: sequelize.where(sequelize.fn('LOWER', sequelize.col('pseudo')), 'LIKE', '%' + request.params.name + '%')}
-                    ]
-                }, attributes: ['id', 'pseudo', 'firstname'],
+                    ]},
+                attributes: ['id', 'pseudo', 'firstname'],
+                order: [[sequelize.literal('RAND()')]]
             });
         }
     },
@@ -299,7 +308,7 @@ module.exports = [
             return Party.findByPk(request.params.id)
                 .then(async (party) => {
                     let bool = await party.hasGuest(invited);
-                    if (party.userId === Number(request.auth.credentials && !bool)) {
+                    if (party.userId === Number(request.auth.credentials) && !bool) {
                         return party.addGuest(invited).then(() => {
                                 if (invited.notification_id){
                                     let message = {
