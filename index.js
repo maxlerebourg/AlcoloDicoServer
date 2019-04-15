@@ -147,6 +147,33 @@ module.exports = [
         }
     },
     {
+        method: 'POST',
+        path: '/add/quote',
+        config: {auth: 'jwt'},
+        handler: (request) => {
+            /*let user = await User.findByPk(request.auth.credentials);
+            if (!user)
+                return reply.response({status: 'You are not log in'});
+            let quote = request.payload;
+            return Quote.findOrCreate({where: {
+                    quote: quote.quote}, defaults})*/
+        }
+    },
+    {
+        method: 'GET',
+        path: '/quote/{id}/plus',
+        config: {auth: 'jwt'},
+        handler: async (request, reply) => {
+            let user = await User.findByPk(request.auth.credentials);
+            if (!user)
+                return reply.response({status: 'You are not log in'});
+            let quote = await Quote.findByPk(request.params.id);
+            if (!quote)
+                return reply.response({status: 'This quote does not exist'});
+            return quote.update({rate: quote.rate + 1});
+        }
+    },
+    {
         method: 'GET',
         path: '/list/cocktail',
         config: {auth: false},
