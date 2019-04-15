@@ -124,11 +124,11 @@ module.exports = [
         handler: (request) => {
             switch (request.params.filter) {
                 case 'new' :
-                    return Quote.findAll({limit: request.params.limit, offset: request.params.limit});
+                    return Quote.findAll({limit: Number(request.params.limit), offset: Number(request.params.offset)});
                 case 'random' :
-                    return Quote.findAll({order: [[sequelize.literal('RAND()')]], limit: request.params.limit, offset: request.params.limit});
+                    return Quote.findAll({order: [[sequelize.literal('RAND()')]], limit: Number(request.params.limit), offset: Number(request.params.offset)});
                 case 'rate' :
-                    return Quote.findAll({order: [['rate','DESC']], limit: request.params.limit, offset: request.params.limit});
+                    return Quote.findAll({order: [['rate','DESC']], limit: Number(request.params.limit), offset: Number(request.params.offset)});
             }
         }
     },
