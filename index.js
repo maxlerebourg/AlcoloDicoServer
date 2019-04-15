@@ -4,7 +4,7 @@ const config = require('./config');
 const requester = require("request-promise");
 
 
-const {User, Category, Game, Comment, Cocktail, Beer, Party, UserParty, sequelize} = require('./sequelize');
+const {User, Category, Game, Comment, Cocktail, Beer, Party, UserParty, Quote, sequelize} = require('./sequelize');
 
 
 var meteo = {date: '', json: []};
@@ -115,6 +115,21 @@ module.exports = [
                 group: 'gameId',
             })*/
             return sequelize.query('SELECT g.*, avg(c.rate) as rate FROM `games` as g LEFT JOIN `comments` AS c ON g.id = c.gameId where g.visible group by g.id order by g.name');
+        }
+    },
+    {
+        method: 'GET',
+        path: '/list/quote/{filter}/{limit}/{offset}',
+        config: {auth: false},
+        handler: (request) => {
+            switch (request.params.filter) {
+                case 'new' :
+                    return Quote.findAll({limit: request.params.limit, offset: request.params.limit});
+                case 'random' :
+                    return Quote.findAll({order: [[sequelize.literal('RAND()')]], limit: request.params.limit, offset: request.params.limit});
+                case 'rate' :
+                    return Quote.findAll({order: [['rate','DESC']], limit: request.params.limit, offset: request.params.limit});
+            }
         }
     },
     {

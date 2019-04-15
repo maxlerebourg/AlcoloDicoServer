@@ -454,14 +454,11 @@ const User = sequelize.define('users', {
     password: {type: Sequelize.STRING},
     admin: {type: Sequelize.BOOLEAN},
 });
-const User2 = sequelize.define('users2', {
-    pseudo: {type: Sequelize.STRING},
-    firstname: {type: Sequelize.STRING},
-    lastname: {type: Sequelize.STRING},
-    mail: {type: Sequelize.STRING},
-    password: {type: Sequelize.STRING},
-    admin: {type: Sequelize.BOOLEAN},
-    notification_id: {type: Sequelize.STRING},
+const Quote = sequelize.define('quotes', {
+    date: {type: Sequelize.DATE},
+    quote: {type: Sequelize.TEXT},
+    link: {type: Sequelize.STRING},
+    rate: {type: Sequelize.INTEGER},
 });
 const Party = sequelize.define('parties', {
     date: {type: Sequelize.DATE},
@@ -476,18 +473,19 @@ Game.belongsTo(User);
 Cocktail.belongsTo(User);
 Beer.belongsTo(User);
 Comment.belongsTo(User);
+Quote.belongsTo(User);
 Party.belongsTo(User);
 Party.belongsToMany(User, {through: 'users_parties'});
 User.belongsToMany(Party, {through: 'users_parties'});
 
-User.sync({force: true}).then(()=>
+/*User.sync({force: true}).then(()=>
     {
         User.findOrCreate({
             where: {pseudo: 'admin', admin: true, id: 1},
             defaults: {firstname: 'Max', lastname: 'Lerebourg', mail: 'maxlerebourg@gmail.com', password: 'password'}
         })
     }
-);
+);*/
 /*
 Category.sync({force: true}).then(
     () => {
@@ -553,5 +551,6 @@ Beer.sync({force: true}).then(() => {
 
 });*/
 //UserParty.sync({force: true});
-Party.sync({force: true});
+//Party.sync({force: true});
+Quote.sync({force: true});
 

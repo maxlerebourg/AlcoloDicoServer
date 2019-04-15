@@ -52,6 +52,12 @@ const Comment = sequelize.define('comments', {
     rate: {type: Sequelize.INTEGER},
     review: {type: Sequelize.TEXT},
 });
+const Quote = sequelize.define('quotes', {
+    date: {type: Sequelize.DATE},
+    quote: {type: Sequelize.TEXT},
+    link: {type: Sequelize.STRING},
+    rate: {type: Sequelize.INTEGER},
+});
 
 
 Game.belongsTo(Category);
@@ -60,9 +66,10 @@ Cocktail.belongsTo(User);
 Beer.belongsTo(User);
 Comment.belongsTo(User);
 Comment.belongsTo(Game);
+Quote.belongsTo(User);
 Party.belongsTo(User);
 User.belongsToMany(Party, {as: 'Parties',through: UserParty});
 Party.belongsToMany(User, {as: 'Guests',through: UserParty});
 
 
-module.exports = {User, Category, Game, Comment, Cocktail, Beer, Party, UserParty, sequelize};
+module.exports = {User, Category, Game, Comment, Cocktail, Beer, Party, UserParty, Quote, sequelize};
