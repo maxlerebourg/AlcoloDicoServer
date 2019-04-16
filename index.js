@@ -125,6 +125,7 @@ module.exports = [
             switch (request.params.filter) {
                 case 'new' :
                     return Quote.findAll({
+                        order: [['date','DESC']],
                         limit: Number(request.params.limit),
                         offset: Number(request.params.offset),
                         include: [{model: User, attributes: ['pseudo']}]
@@ -137,7 +138,9 @@ module.exports = [
                         include: [{model: User, attributes: ['pseudo']}]
                     });
                 case 'rate' :
+                    let date = new Date() - 86400000 * 31;
                     return Quote.findAll({
+                        where: {date: {$gte: date}},
                         order: [['rate','DESC']],
                         limit: Number(request.params.limit),
                         offset: Number(request.params.offset),
