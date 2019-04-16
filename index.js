@@ -153,13 +153,19 @@ module.exports = [
         method: 'POST',
         path: '/add/quote',
         config: {auth: 'jwt'},
-        handler: (request) => {
-            /*let user = await User.findByPk(request.auth.credentials);
+        handler: async (request) => {
+            let user = await User.findByPk(request.auth.credentials);
             if (!user)
                 return reply.response({status: 'You are not log in'});
             let quote = request.payload;
-            return Quote.findOrCreate({where: {
-                    quote: quote.quote}, defaults})*/
+            return Quote.findOrCreate({
+                where: {quote: quote.quote},
+                defaults:{
+                    link: quote.link,
+                    date: quote.date,
+                    rate: 0,
+                    userId: Number(user.id),
+                }})
         }
     },
     {
