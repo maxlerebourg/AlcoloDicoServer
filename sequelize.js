@@ -66,6 +66,7 @@ Cocktail.belongsTo(User);
 Beer.belongsTo(User);
 Comment.belongsTo(User);
 Comment.belongsTo(Game);
+Game.hasMany(Comment);
 Quote.belongsTo(User);
 Party.belongsTo(User);
 User.belongsToMany(Party, {as: 'Parties',through: UserParty});

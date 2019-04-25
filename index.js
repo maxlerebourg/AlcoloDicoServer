@@ -106,15 +106,28 @@ module.exports = [
         path: '/list/game',
         config: {auth: false},
         handler: (request) => {
-            /*return Comment.findAll({
-                attributes: [
-                    [Comment.sequelize.fn('AVG', Comment.sequelize.col('rate')), 'rate'],
-                    [Comment.sequelize.fn('COUNT', Comment.sequelize.col('rate')), 'comments']
-                ],
-                include: [{model: Game}],
-                group: 'gameId',
-            })*/
             return sequelize.query('SELECT g.*, avg(c.rate) as rate FROM `games` as g LEFT JOIN `comments` AS c ON g.id = c.gameId where g.visible group by g.id order by g.name');
+        }
+    },
+    {
+        method: 'GET',
+        path: '/list/games',
+        config: {auth: false},
+        handler: (request) => {
+            return Game.findAll({
+                where: {visible: true},
+                include: [{
+                    required: false,
+                    model: Comment,
+                    attributes: [
+                        [Comment.sequelize.fn('AVG', Comment.sequelize.col('rate')), 'rate'],
+                        [Comment.sequelize.fn('COUNT', Comment.sequelize.col('rate')), 'comments'],
+                    ],
+
+                }],
+                group: ['gameId', 'id'],
+                order: ['name']
+            });
         }
     },
     {
