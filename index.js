@@ -13,7 +13,7 @@ var beer = {date: '', id: 0};
 const login = async function (request, reply) {
     let payload = request.payload;
     return User.findOne({where: {mail: payload.mail, password: payload.password}}).then((user) => {
-        const jwtToken = Jwt.sign(user.id, config.jwt,
+        const jwtToken = Jwt.sign(user.id, 'NeverShareYourSecret',
             {
                 algorithm: 'HS256',
                 //expiresIn: 3600,
