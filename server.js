@@ -3,6 +3,7 @@ const routes = require('./index');
 const config = require('./config');
 
 const validate = async function (decoded, request) {
+    console.log('User ' + decoded + ' did: ');
     return { isValid: true };
     /*if (!people[decoded.id]) {
         return { isValid: false };
@@ -22,7 +23,7 @@ const init = async () => {
 
     server.auth.strategy('jwt', 'jwt',
         {
-            key: 'NeverShareYourSecret',          // Never Share your secret key
+            key: config.jwt,          // Never Share your secret key
             validate: validate,            // validate function defined above
             verifyOptions: { algorithms: [ 'HS256' ] } // pick a strong algorithm
         });

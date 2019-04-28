@@ -13,7 +13,7 @@ var beer = {date: '', id: 0};
 const login = async function (request, reply) {
     let payload = request.payload;
     return User.findOne({where: {mail: payload.mail, password: payload.password}}).then((user) => {
-        const jwtToken = Jwt.sign(user.id, 'NeverShareYourSecret',
+        const jwtToken = Jwt.sign(user.id, config.jwt,
             {
                 algorithm: 'HS256',
                 //expiresIn: 3600,
@@ -299,6 +299,25 @@ module.exports = [
             return party.getGuests({
                 attributes: ['id', 'pseudo', 'firstname'],
             })
+        }
+    },
+    {
+        method: 'POST',
+        path: '/update/party/{id}',
+        config: {auth: 'jwt'},
+        handler: async (request, reply) => {
+            let payload = request.payload;
+            let user = await User.findByPk(request.auth.credentials);
+            if (!user) return reply.response({status: 'You are not log in'});
+            let party = await Party.findByPk(Number(request.params.id));
+            if (!party) return reply.response({status: 'This party does not exist'});
+            if (party.userId === Number(request.auth.credentials)) {
+                return party.update({
+                    location: (payload.location ? payload.location : party.location),
+                    date: (payload.date ? payload.date : party.date),
+                    note: (payload.note ? payload.note : party.note),
+                })
+            } else return reply.response({status: 'You are not the owner of this party'});
         }
     },
     {

@@ -462,6 +462,7 @@ const Quote = sequelize.define('quotes', {
 });
 const Party = sequelize.define('parties', {
     date: {type: Sequelize.DATE},
+    location: {type: Sequelize.STRING},
     note: {type: Sequelize.TEXT},
     visible: {type: Sequelize.BOOLEAN},
 });
