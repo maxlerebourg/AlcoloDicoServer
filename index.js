@@ -83,8 +83,7 @@ module.exports = [
         config: {auth: false},
         handler: (request) => {
             return Game.findAll({
-                where: {visible: true},
-                include: [{model: Category, where: {id: request.params.cat}}],
+                where: {visible: true, categoryId: request.params.cat},
                 order: [['name', 'ASC']],
             })
         }
@@ -115,7 +114,28 @@ module.exports = [
         config: {auth: false},
         handler: (request) => {
             return Game.findAll({
-                where: {visible: true},
+                where: {visible: true, categoryId: {$lte: 5}},
+                include: [{
+                    required: false,
+                    model: Comment,
+                    attributes: [
+                        [Comment.sequelize.fn('AVG', Comment.sequelize.col('rate')), 'rate'],
+                        [Comment.sequelize.fn('COUNT', Comment.sequelize.col('rate')), 'comments'],
+                    ],
+
+                }],
+                group: ['gameId', 'id'],
+                order: ['name']
+            });
+        }
+    },
+    {
+        method: 'GET',
+        path: '/list/video_games',
+        config: {auth: false},
+        handler: (request) => {
+            return Game.findAll({
+                where: {visible: true, categoryId: {$gt: 5}},
                 include: [{
                     required: false,
                     model: Comment,
@@ -570,8 +590,27 @@ module.exports = [
         config: {auth: false},
         handler: async (request, reply) => {
             let rep = [];
+            let auchan = {
+                method: 'GET',
+                url: 'https://www.auchandirect.fr/rayons/9',
+                headers: {
+                    Host: 'www.auchandirect.fr',
+                    Accept: 'application/json',
+                    'Accept-Language': 'fr,fr-FR;q=0.8,en-US;q=0.5,en;q=0.3',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    Connection: 'keep-alive',
+                    TE: 'Trailers',
+                    CacheControl: 'no-cache'
+                }
+            };
+            await requester(auchan)
+                .then(async (body) => {
+                    console.log(body);
+                });
 
-            let carrouf = {
+
+
+            /*let carrouf = {
                 method: 'GET',
                 url: 'https://www.carrefour.fr/r/boissons-et-cave-a-vins/cave-a-bieres-et-cidres?sort=productSimpleView.pricePerUnitCents&noRedirect=0&page=1',
                 headers: {
@@ -681,7 +720,7 @@ module.exports = [
                     return reply.response({
                         status: 'error'
                     })
-                });
+                });*/
             return rep;
         }
     }
