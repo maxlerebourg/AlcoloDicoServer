@@ -559,6 +559,7 @@ module.exports = [
                     images: game.images,
                     categoryId: Number(game.category),
                     visible: false,
+                    multiplayer: game.multiplayer,
                     userId: request.auth.credentials
                 }
             });
