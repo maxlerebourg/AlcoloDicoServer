@@ -12,6 +12,7 @@ const Game = sequelize.define('games', {
     rules: {type: Sequelize.TEXT},
     images: {type: Sequelize.TEXT},
     visible: {type: Sequelize.BOOLEAN},
+    multiplayer: {type: Sequelize.DOUBLE},
 });
 const Cocktail = sequelize.define('cocktails', {
     name: {type: Sequelize.STRING},
@@ -23,7 +24,7 @@ const Cocktail = sequelize.define('cocktails', {
 });
 const Beer = sequelize.define('beers', {
     name: {type: Sequelize.STRING},
-    alcool: {type: Sequelize.DOUBLE},
+    alcohol: {type: Sequelize.DOUBLE},
     price: {type: Sequelize.DOUBLE},
     origin: {type: Sequelize.TEXT},
     images: {type: Sequelize.TEXT},
