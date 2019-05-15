@@ -547,7 +547,7 @@ module.exports = [
             let user = await User.findByPk(request.auth.credentials);
             if (!user)
                 return reply.response({
-                    name: 'You are not log in'
+                    status: 'You are not log in'
                 });
             var game = request.payload;
             console.log(game);
@@ -583,6 +583,71 @@ module.exports = [
                         } else return {temp: false};
                     });
             }
+        }
+    },
+    {
+        method: 'GET',
+        path: '/party/stat',
+        config: {auth: 'jwt'},
+        handler: async (request, reply) => {
+            let user = await User.findByPk(request.auth.credentials);
+            if (!user)
+                return reply.response({
+                    status: 'You are not log in'
+                });
+            let users = [];
+            await user.getParties({where: {visible: true}}).then(
+                async (parties) => {
+                    for (let party of parties){
+                        let usrs = await party.getGuests({attributes: ['pseudo', 'firstname', 'id']});
+                        for (let usr of usrs) {
+                            users.push({
+                                pseudo: usr.pseudo,
+                                firstname: usr.firstname,
+                                id: usr.id,
+                                date: party.date,
+                            })
+                        }
+                    }
+                });
+            let stat = [];
+            for (let guest of users) {
+                let item = await stat.find((item) => {
+                    return item.id === guest.id
+                });
+                if (item) {
+                    item.counter = item.counter + 1;
+                    item.dataPoints.push({x: guest.date.toISOString().substring(0,10), y: item.counter});
+                } else {
+                    let usr = {
+                        pseudo: guest.pseudo,
+                        firstname: guest.firstname,
+                        id: guest.id,
+                        counter: 1,
+                        dataPoints: [{x:guest.date.toISOString().substring(0,10), y: 1}],
+                    };
+                    stat.push(usr);
+                }
+            }
+            return stat;
+        }
+    },
+    {
+        method: 'GET',
+        path: '/party/stats',
+        config: {auth: 'jwt'},
+        handler: async (request, reply) => {
+            let user = await User.findByPk(request.auth.credentials);
+            if (!user)
+                return reply.response({
+                    status: 'You are not log in'
+                });
+            return User.findAll({
+                attributes: ['pseudo', 'firstname', 'id'],
+                include: [{
+                    model: Party,
+                }]
+            });
         }
     },
     {

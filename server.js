@@ -16,7 +16,14 @@ const validate = async function (decoded, request) {
 const init = async () => {
     const server = Hapi.server({
         port: 3000,
-        host: config.url
+        host: config.url,
+        routes: {
+            cors: {
+                origin: [
+                    '*'
+                ]
+            }
+        }
     });
     // include our module here ↓↓
     await server.register(require('hapi-auth-jwt2'));
