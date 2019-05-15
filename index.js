@@ -158,6 +158,7 @@ module.exports = [
             switch (request.params.filter) {
                 case 'new' :
                     return Quote.findAll({
+                        where: {visible: true},
                         order: [['date','DESC']],
                         limit: Number(request.params.limit),
                         offset: Number(request.params.offset),
@@ -165,6 +166,7 @@ module.exports = [
                     });
                 case 'random' :
                     return Quote.findAll({
+                        where: {visible: true},
                         order: [[sequelize.literal('RAND()')]],
                         limit: Number(request.params.limit),
                         offset: Number(request.params.offset),
@@ -173,7 +175,7 @@ module.exports = [
                 case 'rate' :
                     let date = new Date() - 86400000 * 31;
                     return Quote.findAll({
-                        where: {date: {$gte: date}},
+                        where: {date: {$gte: date}, visible: true},
                         order: [['rate','DESC']],
                         limit: Number(request.params.limit),
                         offset: Number(request.params.offset),
@@ -197,6 +199,7 @@ module.exports = [
                     link: quote.link,
                     date: quote.date,
                     rate: 0,
+                    visible: true,
                     userId: Number(user.id),
                 }})
         }

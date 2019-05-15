@@ -59,6 +59,7 @@ const Quote = sequelize.define('quotes', {
     quote: {type: Sequelize.TEXT},
     link: {type: Sequelize.STRING},
     rate: {type: Sequelize.INTEGER},
+    visible: {type: Sequelize.BOOLEAN},
 });
 
 
