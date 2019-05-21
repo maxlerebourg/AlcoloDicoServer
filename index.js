@@ -85,6 +85,16 @@ module.exports = [
             return Game.findAll({
                 where: {visible: true, categoryId: request.params.cat},
                 order: [['name', 'ASC']],
+                include: [{
+                    required: false,
+                    model: Comment,
+                    attributes: [
+                        [Comment.sequelize.fn('AVG', Comment.sequelize.col('rate')), 'rate'],
+                        [Comment.sequelize.fn('COUNT', Comment.sequelize.col('rate')), 'comments'],
+                    ],
+
+                }],
+                group: ['gameId', 'id'],
             })
         }
     },
@@ -97,6 +107,16 @@ module.exports = [
             return Game.findAll({
                 where: {$or: [{visible: false}, {updatedAt: {$gte:date}}]},
                 order: [['createdAt', 'DESC']],
+                include: [{
+                    required: false,
+                    model: Comment,
+                    attributes: [
+                        [Comment.sequelize.fn('AVG', Comment.sequelize.col('rate')), 'rate'],
+                        [Comment.sequelize.fn('COUNT', Comment.sequelize.col('rate')), 'comments'],
+                    ],
+
+                }],
+                group: ['gameId', 'id'],
             })
         }
     },
