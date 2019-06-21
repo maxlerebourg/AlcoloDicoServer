@@ -629,6 +629,7 @@ module.exports = [
                                 firstname: usr.firstname,
                                 id: usr.id,
                                 date: party.date,
+                                location: party.location,
                             })
                         }
                     }
@@ -640,14 +641,14 @@ module.exports = [
                 });
                 if (item) {
                     item.counter = item.counter + 1;
-                    item.dataPoints.push({x: guest.date.toISOString().substring(0,10), y: item.counter});
+                    item.dataPoints.push({x: guest.date.toISOString().substring(0,10), y: item.counter, z: guest.location});
                 } else {
                     let usr = {
                         pseudo: guest.pseudo,
                         firstname: guest.firstname,
                         id: guest.id,
                         counter: 1,
-                        dataPoints: [{x:guest.date.toISOString().substring(0,10), y: 1}],
+                        dataPoints: [{x:guest.date.toISOString().substring(0,10), y: 1, z: guest.location}],
                     };
                     stat.push(usr);
                 }
