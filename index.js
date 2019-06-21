@@ -624,14 +624,13 @@ module.exports = [
                 async (parties) => {
                     for (let party of parties){
                         let usrs = await party.getGuests({attributes: ['pseudo', 'firstname', 'id']});
-                        usrs.map((usr) => {!peopleById[usr.id] ? peopleById[usr.id] = usr.firstname : null;});
                         for (let usr of usrs) {
                             users.push({
                                 pseudo: usr.pseudo,
                                 firstname: usr.firstname,
                                 id: usr.id,
                                 date: party.date,
-                                location: party.location ? party.location : peopleById[party.userId],
+                                location: party.location ? party.location : party.userId,
                             })
                         }
                     }
