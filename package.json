@@ -17,5 +17,5 @@
     "request-promise": "^4.2.4",
     "sequelize": "^5.10.0",
     "socket.io": "^2.2.0"
-  }
+  } 
 }
