@@ -139,8 +139,8 @@ module.exports = [
                     required: false,
                     model: Comment,
                     attributes: [
-                        [Comment.sequelize.fn('AVG', Comment.sequelize.col('rate')), 'rate'],
-                        [Comment.sequelize.fn('COUNT', Comment.sequelize.col('rate')), 'comments'],
+                        [Comment.sequelize.fn('AVG', Sequelize.col('rate')), 'rate'],
+                        [Comment.sequelize.fn('COUNT', Sequelize.col('rate')), 'comments'],
                     ],
 
                 }],
@@ -160,8 +160,8 @@ module.exports = [
                     required: false,
                     model: Comment,
                     attributes: [
-                        [Comment.sequelize.fn('AVG', Comment.sequelize.col('rate')), 'rate'],
-                        [Comment.sequelize.fn('COUNT', Comment.sequelize.col('rate')), 'comments'],
+                        [Comment.sequelize.fn('AVG', Sequelize.col('rate')), 'rate'],
+                        [Comment.sequelize.fn('COUNT', Sequelize.col('rate')), 'comments'],
                     ],
 
                 }],
@@ -563,8 +563,7 @@ module.exports = [
     },
     {
         method: 'POST',
-        path:
-            '/add/game',
+        path: '/add/game',
         config: {auth: 'jwt'},
         handler: async (request, reply) => {
             let user = await User.findByPk(request.auth.credentials);
