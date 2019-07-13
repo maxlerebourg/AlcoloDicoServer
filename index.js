@@ -4,7 +4,7 @@ const config = require('./config');
 const requester = require("request-promise");
 
 
-const {User, Category, Game, Comment, Cocktail, Beer, Party, UserParty, Quote, sequelize} = require('./sequelize');
+const {Op, User, Category, Game, Comment, Cocktail, Beer, Party, UserParty, Quote, sequelize} = require('./sequelize');
 
 
 var meteo = {date: '', json: []};
@@ -105,7 +105,7 @@ module.exports = [
         handler: (request) => {
             let date = new Date().getTime() - 86400000 * 7;
             return Game.findAll({
-                where: {$or: [{visible: false}, {updatedAt: {$gte:date}}]},
+                where: {[Op.or]: [{visible: false}, {updatedAt: {[Op.gte]:date}}]},
                 order: [['createdAt', 'DESC']],
                 include: [{
                     required: false,
@@ -134,13 +134,13 @@ module.exports = [
         config: {auth: false},
         handler: (request) => {
             return Game.findAll({
-                where: {visible: true, categoryId: {$lte: 5}},
+                where: {visible: true, categoryId: {[Op.lt]: 5},},
                 include: [{
                     required: false,
                     model: Comment,
                     attributes: [
-                        [Comment.sequelize.fn('AVG', Sequelize.col('rate')), 'rate'],
-                        [Comment.sequelize.fn('COUNT', Sequelize.col('rate')), 'comments'],
+                        [Comment.sequelize.fn('AVG', Comment.sequelize.col('rate')), 'rate'],
+                        [Comment.sequelize.fn('COUNT', Comment.sequelize.col('rate')), 'comments'],
                     ],
 
                 }],
@@ -155,13 +155,13 @@ module.exports = [
         config: {auth: false},
         handler: (request) => {
             return Game.findAll({
-                where: {visible: true, categoryId: {$gt: 5}},
+                where: {visible: true, categoryId: {[Op.gte]: 5}},
                 include: [{
                     required: false,
                     model: Comment,
                     attributes: [
-                        [Comment.sequelize.fn('AVG', Sequelize.col('rate')), 'rate'],
-                        [Comment.sequelize.fn('COUNT', Sequelize.col('rate')), 'comments'],
+                        [Comment.sequelize.fn('AVG', Comment.sequelize.col('rate')), 'rate'],
+                        [Comment.sequelize.fn('COUNT', Comment.sequelize.col('rate')), 'comments'],
                     ],
 
                 }],
@@ -195,7 +195,7 @@ module.exports = [
                 case 'rate' :
                     let date = new Date() - 86400000 * 31;
                     return Quote.findAll({
-                        where: {date: {$gte: date}, visible: true},
+                        where: {date: {[Op.gte]: date}, visible: true},
                         order: [['rate','DESC']],
                         limit: Number(request.params.limit),
                         offset: Number(request.params.offset),
@@ -279,7 +279,7 @@ module.exports = [
             return User.findAll({
                 limit: 10,
                 where: {
-                    $or: [
+                    [Op.or]: [
                         {firstname: sequelize.where(sequelize.fn('LOWER', sequelize.col('firstname')), 'LIKE', '%' + request.params.name + '%')},
                         {pseudo: sequelize.where(sequelize.fn('LOWER', sequelize.col('pseudo')), 'LIKE', '%' + request.params.name + '%')}
                     ]},
@@ -299,7 +299,7 @@ module.exports = [
             return user.getParties({
                 where: {visible: true},
                 include: [{model: User,
-                    attributes: {exclude: ['password', 'mail']}
+                    attributes: {exclude: ['password', 'mail', 'notification_id']}
                 }],
 
             })
@@ -317,9 +317,9 @@ module.exports = [
             let startMonth = new Date(date.getFullYear(), date.getMonth(), 1);
             let endMonth = new Date(date.getFullYear(), date.getMonth() + 1, 1);
             return user.getParties({
-                where: {visible: true, $and : [{date : {$gte: startMonth}},{date :  {$lt: endMonth}}]},
+                where: {visible: true, [Op.and] : [{date : {[Op.gte]: startMonth}},{date :  {[Op.lt]: endMonth}}]},
                 include: [{model: User,
-                    attributes: {exclude: ['password', 'mail']}
+                    attributes: {exclude: ['password', 'mail', 'notification_id']}
                 }],
 
             })

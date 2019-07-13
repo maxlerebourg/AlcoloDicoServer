@@ -5,7 +5,7 @@ const Sequelize = require('sequelize');
 const sequelize = new Sequelize('mysql://root:' + config.mdp + '@127.0.0.1:3306/' + config.db);
 sequelize.authenticate();
 
-
+const Op = Sequelize.Op
 const Game = sequelize.define('games', {
     name: {type: Sequelize.STRING},
     preview: {type: Sequelize.TEXT},
@@ -76,4 +76,4 @@ User.belongsToMany(Party, {as: 'Parties',through: UserParty});
 Party.belongsToMany(User, {as: 'Guests',through: UserParty});
 
 
-module.exports = {User, Category, Game, Comment, Cocktail, Beer, Party, UserParty, Quote, sequelize};
+module.exports = {Op, User, Category, Game, Comment, Cocktail, Beer, Party, UserParty, Quote, sequelize};
