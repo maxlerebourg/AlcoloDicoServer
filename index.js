@@ -134,7 +134,7 @@ module.exports = [
         config: {auth: false},
         handler: (request) => {
             return Game.findAll({
-                where: {visible: true, categoryId: {[Op.lt]: 5},},
+                where: {visible: true, categoryId: {[Op.lte]: 5},},
                 include: [{
                     required: false,
                     model: Comment,
