@@ -32,6 +32,27 @@ const login = async function (request, reply) {
         })
     })
 };
+const notify_admin = function (text) {
+    User.findOne({where: {admin: true}}).then((admin) => {
+        let message = {
+            notification: {
+                title: 'Notif Admin',
+                body: text
+            },
+            to: admin.notification_id
+        };
+        let fcm_send = {
+            method: 'POST',
+            url: 'https://fcm.googleapis.com/fcm/send',
+            headers: {
+                'Content-Type':'application/json',
+                Authorization: 'key='+config.fcm_notif,
+            },
+            body: JSON.stringify(message)
+        };
+        requester(fcm_send);
+    });
+};
 
 module.exports = [
     {
@@ -573,6 +594,8 @@ module.exports = [
                 });
             var game = request.payload;
             console.log(game);
+            notify_admin('nouveau jeu disponible : ' + game.name);
+
             return Game.findOrCreate({
                 where: {name: game.name},
                 defaults: {
