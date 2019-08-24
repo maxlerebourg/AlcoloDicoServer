@@ -616,7 +616,7 @@ module.exports = [
                 return reply.response({
                     status: 'You are not log in'
                 });
-            var game = request.payload;
+            let game = request.payload;
             console.log(game);
             notify_admin('nouveau jeu disponible : ' + game.name);
 
