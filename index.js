@@ -315,7 +315,10 @@ module.exports = [
         config: {auth: false},
         handler: (request) => {
             return Game.findAll({
-                where: {name: sequelize.where(sequelize.fn('LOWER', sequelize.col('name')), 'LIKE', '%' + request.params.name + '%')},
+                where: {
+                    name: sequelize.where(sequelize.fn('LOWER', sequelize.col('name')), 'LIKE', '%' + request.params.name + '%'),
+                    visible: true,
+                },
                 include: [{
                     required: false,
                     model: Comment,
