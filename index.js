@@ -311,6 +311,27 @@ module.exports = [
     },
     {
         method: 'GET',
+        path: '/search/game/{name}',
+        config: {auth: false},
+        handler: (request) => {
+            return Game.findAll({
+                where: {name: sequelize.where(sequelize.fn('LOWER', sequelize.col('name')), 'LIKE', '%' + request.params.name + '%')},
+                include: [{
+                    required: false,
+                    model: Comment,
+                    attributes: [
+                        [Comment.sequelize.fn('AVG', Comment.sequelize.col('rate')), 'rate'],
+                        [Comment.sequelize.fn('COUNT', Comment.sequelize.col('rate')), 'comments'],
+                    ],
+
+                }],
+                group: ['gameId', 'id'],
+                order: ['name']
+            });
+        }
+    },
+    {
+        method: 'GET',
         path: '/party',
         config: {auth: 'jwt'},
         handler: async (request, reply) => {
