@@ -4,13 +4,12 @@ const config = require('./config');
 
 const validate = async function (decoded, request) {
     console.log('User ' + decoded + ' did: ');
-    return { isValid: true };
-    /*if (!people[decoded.id]) {
+    if (Number(decoded)) {
         return { isValid: false };
     }
     else {
         return { isValid: true };
-    }*/
+    }
 };
 
 const init = async () => {

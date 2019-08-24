@@ -155,7 +155,7 @@ module.exports = [
         config: {auth: false},
         handler: (request) => {
             return Game.findAll({
-                where: {visible: true, categoryId: {[Op.lte]: 5},},
+                where: {visible: true, categoryId: {[Op.lte]: 6},},
                 include: [{
                     required: false,
                     model: Comment,
@@ -176,7 +176,7 @@ module.exports = [
         config: {auth: false},
         handler: (request) => {
             return Game.findAll({
-                where: {visible: true, categoryId: {[Op.gte]: 5}},
+                where: {visible: true, categoryId: {[Op.gt]: 6}},
                 include: [{
                     required: false,
                     model: Comment,
