@@ -143,19 +143,11 @@ module.exports = [
     },
     {
         method: 'GET',
-        path: '/list/game',
-        config: {auth: false},
-        handler: (request) => {
-            return sequelize.query('SELECT g.*, avg(c.rate) as rate FROM `games` as g LEFT JOIN `comments` AS c ON g.id = c.gameId where g.visible group by g.id order by g.name');
-        }
-    },
-    {
-        method: 'GET',
         path: '/list/games',
         config: {auth: false},
         handler: (request) => {
             return Game.findAll({
-                where: {visible: true, categoryId: {[Op.lte]: 6},},
+                where: {visible: true},
                 include: [{
                     required: false,
                     model: Comment,
@@ -166,7 +158,7 @@ module.exports = [
 
                 }],
                 group: ['gameId', 'id'],
-                order: ['name']
+                order: ['categoryId', 'name']
             });
         }
     },
