@@ -147,7 +147,7 @@ module.exports = [
         config: {auth: false},
         handler: (request) => {
             return Game.findAll({
-                where: {visible: true},
+                where: {visible: true, categoryId: {[Op.lte]: 6},},
                 include: [{
                     required: false,
                     model: Comment,
@@ -158,7 +158,7 @@ module.exports = [
 
                 }],
                 group: ['gameId', 'id'],
-                order: ['categoryId', 'name']
+                order: ['name']
             });
         }
     },
