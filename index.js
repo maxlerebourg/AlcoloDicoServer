@@ -148,7 +148,6 @@ module.exports = [
         handler: (request) => {
             return Category.findAll({
                 include: [{
-                    required: false,
                     model: Game,
                     where: {visible: true},
                     include: {
@@ -161,7 +160,7 @@ module.exports = [
                     },
                 }],
                 order: [[sequelize.literal('RAND()')]],
-                group: ['gameId', 'id'],
+                group: ['gameId', 'games.id'],
             });
         }
     },
