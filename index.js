@@ -146,7 +146,23 @@ module.exports = [
         path: '/list/categories',
         config: {auth: false},
         handler: (request) => {
-            return Category.findAll();
+            return Category.findAll({
+                include: [{
+                    required: false,
+                    model: Game,
+                    where: {visible: true},
+                    include: {
+                        required: false,
+                        model: Comment,
+                        attributes: [
+                            [Comment.sequelize.fn('AVG', Comment.sequelize.col('rate')), 'rate'],
+                            [Comment.sequelize.fn('COUNT', Comment.sequelize.col('rate')), 'comments'],
+                        ],
+
+                    },
+                }],
+                group: ['gameId', 'id']
+            });
         }
     },
     {

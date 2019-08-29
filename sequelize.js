@@ -64,6 +64,7 @@ const Quote = sequelize.define('quotes', {
 
 
 Game.belongsTo(Category);
+Category.hasMany(Game);
 Game.belongsTo(User);
 Cocktail.belongsTo(User);
 Beer.belongsTo(User);
