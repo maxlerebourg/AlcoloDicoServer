@@ -158,10 +158,10 @@ module.exports = [
                             [Comment.sequelize.fn('AVG', Comment.sequelize.col('rate')), 'rate'],
                             [Comment.sequelize.fn('COUNT', Comment.sequelize.col('rate')), 'comments'],
                         ],
-
                     },
                 }],
-                group: ['gameId', 'id']
+                order: [[sequelize.literal('RAND()')]],
+                group: ['gameId', 'id'],
             });
         }
     },
