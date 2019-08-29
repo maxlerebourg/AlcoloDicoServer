@@ -143,11 +143,19 @@ module.exports = [
     },
     {
         method: 'GET',
+        path: '/list/categories',
+        config: {auth: false},
+        handler: (request) => {
+            return Category.findAll();
+        }
+    },
+    {
+        method: 'GET',
         path: '/list/games',
         config: {auth: false},
         handler: (request) => {
             return Game.findAll({
-                where: {visible: true, categoryId: {[Op.lte]: 6},},
+                where: {visible: true},
                 include: [{
                     required: false,
                     model: Comment,
@@ -158,7 +166,7 @@ module.exports = [
 
                 }],
                 group: ['gameId', 'id'],
-                order: ['name']
+                order: [[sequelize.literal('RAND()')]]
             });
         }
     },
