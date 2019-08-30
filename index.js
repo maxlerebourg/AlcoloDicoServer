@@ -181,7 +181,7 @@ module.exports = [
 
                 }],
                 group: ['gameId', 'id'],
-                order: [[sequelize.literal('RAND()')]]
+                order: ['name']
             });
         }
     },
