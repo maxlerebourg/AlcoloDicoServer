@@ -190,7 +190,7 @@ module.exports = [
                 }],
                 group: ['gameId', 'id'],
             });
-            return reply.response(cat.concat({id: 100, name: 'Nouveautés', games: news}).concat({id: 101, name: 'Deux joueurs', games: two}));
+            return reply.response([{id: 100, name: 'Nouveautés', games: news}].concat(cat).concat({id: 101, name: 'Deux joueurs', games: two}));
         }
     },
     {
