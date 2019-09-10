@@ -138,15 +138,15 @@ module.exports = [
 
                 }],
                 group: ['gameId', 'id'],
-            })
+            });
         }
     },
     {
         method: 'GET',
         path: '/list/categories',
         config: {auth: false},
-        handler: (request) => {
-            return Category.findAll({
+        handler: async (request, reply) => {
+            let cat = await Category.findAll({
                 include: [{
                     model: Game,
                     where: {visible: true},
@@ -162,6 +162,35 @@ module.exports = [
                 order: [[sequelize.literal('RAND()')]],
                 group: ['gameId', 'games.id'],
             });
+            let news = await Game.findAll({
+                where: {[Op.or]: [{visible: false}, {updatedAt: {[Op.gte]:new Date().getTime() - 86400000 * 7}}]},
+                order: [['createdAt', 'DESC']],
+                include: [{
+                    required: false,
+                    model: Comment,
+                    attributes: [
+                        [Comment.sequelize.fn('AVG', Comment.sequelize.col('rate')), 'rate'],
+                        [Comment.sequelize.fn('COUNT', Comment.sequelize.col('rate')), 'comments'],
+                    ],
+
+                }],
+                group: ['gameId', 'id'],
+            });
+            let two = await Game.findAll({
+                where: {multiplayer: 2},
+                order: [['createdAt', 'DESC']],
+                include: [{
+                    required: false,
+                    model: Comment,
+                    attributes: [
+                        [Comment.sequelize.fn('AVG', Comment.sequelize.col('rate')), 'rate'],
+                        [Comment.sequelize.fn('COUNT', Comment.sequelize.col('rate')), 'comments'],
+                    ],
+
+                }],
+                group: ['gameId', 'id'],
+            });
+            return reply.response(cat.concat({id: 100, name: 'Nouveautés', games: news}).concat({id: 101, name: 'Deux joueurs', games: two}));
         }
     },
     {

@@ -12,7 +12,7 @@ const Game = sequelize.define('games', {
     rules: {type: Sequelize.TEXT},
     images: {type: Sequelize.TEXT},
     visible: {type: Sequelize.BOOLEAN},
-    multiplayer: {type: Sequelize.DOUBLE},
+    multiplayer: {type: Sequelize.INTEGER},
 });
 const Cocktail = sequelize.define('cocktails', {
     name: {type: Sequelize.STRING},
