@@ -173,7 +173,7 @@ module.exports = [
                         [Comment.sequelize.fn('COUNT', Comment.sequelize.col('rate')), 'comments'],
                     ],
 
-                }],
+                }], 
                 group: ['gameId', 'id'],
             });
             let two = await Game.findAll({
