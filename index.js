@@ -160,7 +160,7 @@ module.exports = [
                     },
                 }],
                 order: [[sequelize.literal('RANDOM()')]],
-                group: ['comments.gameId', 'games.id'],
+                group: ['games->comments.gameId', 'games.id'],
             });
             let news = await Game.findAll({
                 where: {[Op.or]: [{visible: false}, {updatedAt: {[Op.gte]:new Date().getTime() - 86400000 * 7}}]},
@@ -174,7 +174,7 @@ module.exports = [
                     ],
 
                 }],
-                group: ['comments.gameId', 'games.id'],
+                group: ['games->comments.gameId', 'games.id'],
             });
             let two = await Game.findAll({
                 where: {multiplayer: 2},
@@ -188,7 +188,7 @@ module.exports = [
                     ],
 
                 }],
-                group: ['comments.gameId', 'games.id'],
+                group: ['games->comments.gameId', 'games.id'],
             });
             return reply.response([{id: 100, name: 'Nouveautés', games: news}].concat(cat).concat({id: 101, name: 'Deux joueurs', games: two}));
         }
@@ -372,8 +372,8 @@ module.exports = [
                     ],
 
                 }],
-                group: ['gameId', 'id'],
-                order: ['name']
+                group: ['games->comments.gameId', 'games.id'],
+                order: ['games.name']
             });
         }
     },
