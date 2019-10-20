@@ -175,7 +175,7 @@ module.exports = [
 
 
                 }],
-                group: ['comments.gameId', 'games.id', 'games->comments.id'],
+                group: ['games->comments.gameId', 'games.id', 'games->comments.id'],
             });
             let two = await Game.findAll({
                 where: {multiplayer: 2},
@@ -189,7 +189,7 @@ module.exports = [
                     ],
 
                 }],
-                group: ['comments.gameId', 'games.id', 'games->comments.id'],
+                group: ['games->comments.gameId', 'games.id', 'games->comments.id'],
             });
             return reply.response([{id: 100, name: 'Nouveautés', games: news}].concat(cat).concat({id: 101, name: 'Deux joueurs', games: two}));
         }
@@ -373,7 +373,7 @@ module.exports = [
                     ],
 
                 }],
-                group: ['comments.gameId', 'games.id',  'comments.id'],
+                group: ['games->comments.gameId', 'games.id',  'games->comments.id'],
                 order: ['games.name']
             });
         }
