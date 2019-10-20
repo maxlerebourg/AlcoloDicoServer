@@ -159,7 +159,7 @@ module.exports = [
                         ],
                     },
                 }],
-                order: [[sequelize.literal('RAND()')]],
+                order: [[sequelize.literal('RANDOM()')]],
                 group: ['comments.gameId', 'games.id'],
             });
             let news = await Game.findAll({
