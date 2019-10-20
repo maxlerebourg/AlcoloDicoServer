@@ -374,7 +374,7 @@ module.exports = [
 
                 }],
                 group: ['comments.gameId', 'games.id',  'comments.id'],
-                order: ['games.name'] 
+                order: ['games.name']
             });
         }
     },
