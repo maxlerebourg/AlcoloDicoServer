@@ -2,10 +2,10 @@ const config = require('./config');
 
 const Sequelize = require('sequelize');
 
-const sequelize = new Sequelize('mysql://root:' + config.mdp + '@127.0.0.1:3306/' + config.db);
+const sequelize = new Sequelize('postgres://max:' + config.mdp + '@127.0.0.1:5432/' + config.db);
 sequelize.authenticate();
 
-const Op = Sequelize.Op
+const Op = Sequelize.Op;
 const Game = sequelize.define('games', {
     name: {type: Sequelize.STRING},
     preview: {type: Sequelize.TEXT},

@@ -419,16 +419,7 @@ const Game = sequelize.define('games', {
     rules: {type: Sequelize.TEXT},
     images: {type: Sequelize.TEXT},
     visible: {type: Sequelize.BOOLEAN},
-});
-const Category = sequelize.define('categories', {
-    name: {type: Sequelize.STRING},
-});
-const AltRule = sequelize.define('altrules', {
-    rules: {type: Sequelize.TEXT},
-});
-const Comment = sequelize.define('comments', {
-    rate: {type: Sequelize.INTEGER},
-    review: {type: Sequelize.TEXT},
+    multiplayer: {type: Sequelize.INTEGER},
 });
 const Cocktail = sequelize.define('cocktails', {
     name: {type: Sequelize.STRING},
@@ -440,7 +431,7 @@ const Cocktail = sequelize.define('cocktails', {
 });
 const Beer = sequelize.define('beers', {
     name: {type: Sequelize.STRING},
-    alcool: {type: Sequelize.DOUBLE},
+    alcohol: {type: Sequelize.DOUBLE},
     price: {type: Sequelize.DOUBLE},
     origin: {type: Sequelize.TEXT},
     images: {type: Sequelize.TEXT},
@@ -453,12 +444,7 @@ const User = sequelize.define('users', {
     mail: {type: Sequelize.STRING},
     password: {type: Sequelize.STRING},
     admin: {type: Sequelize.BOOLEAN},
-});
-const Quote = sequelize.define('quotes', {
-    date: {type: Sequelize.DATE},
-    quote: {type: Sequelize.TEXT},
-    link: {type: Sequelize.STRING},
-    rate: {type: Sequelize.INTEGER},
+    notification_id: {type: Sequelize.STRING},
 });
 const Party = sequelize.define('parties', {
     date: {type: Sequelize.DATE},
@@ -468,16 +454,34 @@ const Party = sequelize.define('parties', {
 });
 const UserParty = sequelize.define('users_parties');
 
+const Category = sequelize.define('categories', {
+    name: {type: Sequelize.STRING},
+});
+const Comment = sequelize.define('comments', {
+    rate: {type: Sequelize.INTEGER},
+    review: {type: Sequelize.TEXT},
+});
+const Quote = sequelize.define('quotes', {
+    date: {type: Sequelize.DATE},
+    quote: {type: Sequelize.TEXT},
+    link: {type: Sequelize.STRING},
+    rate: {type: Sequelize.INTEGER},
+    visible: {type: Sequelize.BOOLEAN},
+});
+
 
 Game.belongsTo(Category);
+Category.hasMany(Game);
 Game.belongsTo(User);
 Cocktail.belongsTo(User);
 Beer.belongsTo(User);
 Comment.belongsTo(User);
+Comment.belongsTo(Game);
+Game.hasMany(Comment);
 Quote.belongsTo(User);
 Party.belongsTo(User);
-Party.belongsToMany(User, {through: 'users_parties'});
-User.belongsToMany(Party, {through: 'users_parties'});
+User.belongsToMany(Party, {as: 'Parties',through: UserParty});
+Party.belongsToMany(User, {as: 'Guests',through: UserParty});
 
 /*User.sync({force: true}).then(()=>
     {
