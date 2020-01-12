@@ -173,7 +173,7 @@ module.exports = [
                         [Comment.sequelize.fn('COUNT', Comment.sequelize.col('rate')), 'comments'],
                     ],
 
-                }], 
+                }],
                 group: ['gameId', 'id'],
             });
             let two = await Game.findAll({
@@ -673,7 +673,7 @@ module.exports = [
                     categoryId: Number(game.category),
                     visible: false,
                     multiplayer: game.multiplayer,
-                    userId: request.auth.credentials
+                    userId: Number(request.auth.credentials),
                 }
             });
         }
